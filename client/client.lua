@@ -7,6 +7,7 @@ local drugCount = 0
 
 local function loadAnimDict(dict) while (not HasAnimDictLoaded(dict)) do RequestAnimDict(dict) Wait(5) end end
 
+--Alcohol Effects
 function AlienEffect()
     StartScreenEffect("DrugsMichaelAliensFightIn", 3.0, 0)
     Wait(math.random(5000, 8000))
@@ -40,14 +41,31 @@ function AlienEffect()
     StopScreenEffect("DrugsMichaelAliensFight")
     StopScreenEffect("DrugsMichaelAliensFightOut")
 end
+--Weed Effects
+function WeedEffect()
+    StartScreenEffect("DrugsMichaelAliensFightIn", 3.0, 0)
+    Wait(math.random(3000, 20000))
+    StartScreenEffect("DrugsMichaelAliensFight", 3.0, 0)
+    Wait(math.random(15000, 20000))
+    StartScreenEffect("DrugsMichaelAliensFightOut", 3.0, 0)
+    StopScreenEffect("DrugsMichaelAliensFightIn")
+    StopScreenEffect("DrugsMichaelAliensFight")
+    StopScreenEffect("DrugsMichaelAliensFightOut")
+end
+--Other Effects
+function TrevorEffect()
+    StartScreenEffect("DrugsTrevorClownsFightIn", 3.0, 0)
+    Wait(3000)
+    StartScreenEffect("DrugsTrevorClownsFight", 3.0, 0)
+    Wait(30000)
+	StartScreenEffect("DrugsTrevorClownsFightOut", 3.0, 0)
+	StopScreenEffect("DrugsTrevorClownsFight")
+	StopScreenEffect("DrugsTrevorClownsFightIn")
+	StopScreenEffect("DrugsTrevorClownsFightOut")
+end
 
---[[function HealDrug()
-    if not healing then
-        healing = true
-    else
-        return
-    end
-
+function HealEffect()
+    if not healing then healing = true else return end
     local count = 9
     while count > 0 do
         Wait(1000)
@@ -57,36 +75,22 @@ end
     healing = false
 end
 
-function MethBagEffect()
+function StaminaEffect()
     local startStamina = 8
-    --TrevorEffect()
     SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
     while startStamina > 0 do
         Wait(1000)
-        if math.random(5, 100) < 10 then
-            RestorePlayerStamina(PlayerId(), 1.0)
-        end
+        if math.random(5, 100) < 10 then RestorePlayerStamina(PlayerId(), 1.0) end
         startStamina = startStamina - 1
-        if math.random(5, 100) < 51 then
-            --TrevorEffect()
-        end
+        if math.random(5, 100) < 51 then end
     end
     startStamina = 0
     SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 end
 
-function TrevorEffect()
-    StartScreenEffect("DrugsTrevorClownsFightIn", 3.0, 0)
-    Wait(3000)
-    StartScreenEffect("DrugsTrevorClownsFight", 3.0, 0)
-    Wait(3000)
-	StartScreenEffect("DrugsTrevorClownsFightOut", 3.0, 0)
-	StopScreenEffect("DrugsTrevorClownsFight")
-	StopScreenEffect("DrugsTrevorClownsFightIn")
-	StopScreenEffect("DrugsTrevorClownsFightOut")
-end
 
-function EcstasyEffect()
+
+--[[function EcstasyEffect()
     local startStamina = 30
     SetFlash(0, 0, 500, 7000, 500)
     while startStamina > 0 do
@@ -103,27 +107,6 @@ function EcstasyEffect()
     end
 
     startStamina = 0
-end
-
-function JointEffect()
-    -- if not onWeed then
-    --     local RelieveOdd = math.random(35, 45)
-    --     onWeed = true
-    --     local weedTime = Config.JointEffectTime
-    --     CreateThread(function()
-    --         while onWeed do
-    --             SetPlayerHealthRechargeMultiplier(PlayerId(), 1.8)
-    --             Wait(1000)
-    --             weedTime = weedTime - 1
-    --             if weedTime == RelieveOdd then
-    --                 TriggerServerEvent('hud:Server:RelieveStress', math.random(14, 18))
-    --             end
-    --             if weedTime <= 0 then
-    --                 onWeed = false
-    --             end
-    --         end
-    --     end)
-    -- end
 end
 
 function CrackBaggyEffect()
@@ -183,12 +166,12 @@ end]]
 local consuming = false
 local cancelled = false
 
-RegisterNetEvent('jim-consumables:Consume', function(itemName, type)
+RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	local Player = PlayerPedId()
 	local emote = Config.Emotes[Config.Consumables[itemName].emote]
 	local animDict = tostring(emote[1])
 	local anim = tostring(emote[2])
-	local model, bone, drugeffect = nil
+	local model, bone, drugeffect, stress = nil
 	local P1, P2, P3, P4, P5, P6 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0})
 	if emote.AnimationOptions.Prop then
 		model = tostring(emote.AnimationOptions.Prop)
@@ -196,7 +179,9 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName, type)
 		P1, P2, P3, P4, P5, P6 = table.unpack(emote.AnimationOptions.PropPlacement)
 	end
 	local type = Config.Consumables[itemName].type
-	
+	local stress = Config.Consumables[itemName].stress
+	local heal = Config.Consumables[itemName].heal
+	local armor = Config.Consumables[itemName].armor
 	if type == "drink" or type == "alcohol" then string = "Drinking " end
 	if type == "food" then string = "Eating " end
 	if type == "drug" then string = "Using " end
@@ -235,7 +220,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName, type)
 	
 	consuming = true
 	while consuming do
-		if time <= 0 then consuming = false print("complete") end
+		if time <= 0 then consuming = false end
 		if IsControlJustPressed(0, 21) then
 			consuming = false
 			cancelled = true
@@ -261,8 +246,12 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName, type)
 			if type == "drink" then TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + math.random(10,20)) end
 		end
 		
-        if stress then TriggerServerEvent('hud:server:RelieveStress', math.random(2, 4)) end
+        if stress then TriggerServerEvent('hud:server:RelieveStress', stress) end
 		
+		if heal then SetEntityHealth(Player, GetEntityHealth(Player) + heal) end
+				
+		if armor then TriggerServerEvent('hospital:server:SetArmor', (GetPedArmour(Player) + armor)) SetPedArmour(Player, (GetPedArmour(Player) + armor)) end
+
 		if type == "alcohol" then
 			alcoholCount = alcoholCount + 1
 			if alcoholCount > 1 and alcoholCount < 4 then
@@ -273,34 +262,37 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName, type)
 			end
         end
 		
-		--[[drugeffect = Config.Consumables[itemName].drugeffect
+		effect = Config.Consumables[itemName].effect
 
-		if drugeffect ~= nil then
-			if drugeffect.canOD then
-				drugCount = drugCount + 2
+		if effect ~= nil then
+			if effect.canOD then
+				drugCount = drugCount + 1
 				if drugCount >= 4 then
-					SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) - math.random(20,40))
+					SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) - math.random(10,15))
 					if drugCount >= 6 then
 						AlienEffect()
 					end
 				end
 			end
-			if drugeffect.armour then 
+			if effect.effect == "weed" then
+				if drugCount >= 2 then
+					TrevorEffect()
+				end
 			end
-			if drugeffect.health then
-				HealDrug()
+			if effect.effect == "heal" then
+				HealEffect()
 			end
-			if drugeffect.stamina then
-				MethBagEffect()
+			if effect.effect == "stamina" then
+				StaminaEffect()
 				if drugCount >= 4 then
 					TrevorEffect()
 				end
 			end
-			if drugeffect.widepupils then
+			if effect.widepupils then
 				TriggerEvent("evidence:client:SetStatus", "widepupils", 200)
-				EcstasyEffect()
+				--EcstasyEffect()
 			end
-		end]]
+		end
 
 	end
 	cancelled = false
@@ -318,7 +310,7 @@ CreateThread(function()
         end
 	end
 end)
---[[CreateThread(function()
+CreateThread(function()
 	while true do
         Wait(10)
         if drugCount > 0 then
@@ -328,4 +320,4 @@ end)
             Wait(2000)
         end
     end
-end)]]
+end)
