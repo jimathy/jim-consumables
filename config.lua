@@ -9,57 +9,69 @@ Config = {}
 Config.Debug = false  -- false to remove green boxes
 
 Config.Consumables = {
-	-- Default QB food item override
-	["vodka"] = { 			emote = "vodkab", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", },
-	["beer"] = { 			emote = "beer", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", },
-	["whiskey"] = { 		emote = "whiskey", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", },
+	-- Default QB food and drink item override
+	["vodka"] = { 			emote = "vodkab", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", stats = { thirst = math.random(10,20), }},
+	["beer"] = { 			emote = "beer", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", stats = { thirst = math.random(10,20), }},
+	["whiskey"] = { 		emote = "whiskey", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", stats = { thirst = math.random(10,20), }},
 	
-	["sandwich"] = { 		emote = "sandwich", stress = math.random(2, 4), heal = 0, armor = 0, type = "food", },
-	["twerks_candy"] = { 	emote = "egobar", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "food", },
-	["snikkel_candy"] = { 	emote = "egobar", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "food", },
-	["tosti"] = { 			emote = "sandwich", stress = math.random(2, 4), heal = 0, armor = 0, type = "food", },
+	["sandwich"] = { 		emote = "sandwich", stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(10,20), }},
+	["twerks_candy"] = { 	emote = "egobar", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(10,20), }},
+	["snikkel_candy"] = { 	emote = "egobar", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(10,20), }},
+	["tosti"] = { 			emote = "sandwich", stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(10,20), }},
 	
-	["coffee"] = { 			emote = "coffee", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", },
-	["water_bottle"] = { 	emote = "drink", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", },
-	["kurkakola"] = { 		emote = "ecola", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", },
+	["coffee"] = { 			emote = "coffee", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { thirst = math.random(10,20), }},
+	["water_bottle"] = { 	emote = "drink", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { thirst = math.random(10,20), }},
+	["kurkakola"] = { 		emote = "ecola", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { thirst = math.random(10,20), }},
 
---Testing these but they may be best left handled by default scripts	
+
+	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+	-- Items that effect status changes, like bleeding can cause problems as they are all handled in their own scripts
+	--[[--Testing these but they may be best left handled by default scripts	
 	["ifaks"] = { 			emote = "oxy", 		stress = math.random(12, 24), heal = 10, armor = 0, type = "drug", },
 	["bandage"] = { 		emote = "oxy", 		stress = 0, heal = 10, armor = 0, type = "drug", },
 	
---Testing effects & armor with small functionality to drugs
-	["joint"] = { 			emote = "smoke3",	stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "weed", stamina = false, widepupils = false, canOD = true } },
+	--Testing effects & armor with small functionality to drugs - This may be another one left to default scripts
+	["joint"] = { 			emote = "smoke3",	stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "weed", widepupils = false, canOD = false } },
 	
+	["cokebaggy"] = { 		emote = "coke",		stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "stamina", widepupils = false, canOD = true } },
+	--["crackbaggy"] = { 		emote = "coke",		stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "heal", widepupils = false, canOD = true } },
+	["xtcbaggy"] = { 		emote = "oxy",		stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "stamina", widepupils = true, canOD = true } },
+	["oxy"] = { 			emote = "oxy",		stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "heal", widepupils = false, canOD = false } },
+	["meth"] = { 			emote = "coke",		stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", effect = { effect = "stamina", widepupils = false, canOD = true } },]]
+	----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	
---[[ Not working yet
-	--Drugs
-	["cokebaggy"] = {		emote = "coke", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drug", effect = { armor = false, health = false, stamina = false, widepupils = false, canOD = true, screen = 1 } },
-	["crackbaggy"] = {		emote = "coke", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drug", effect = { armor = false, health = false, stamina = false, widepupils = false, canOD = true, screen = 1  } },
-	["xtcbaggy"] = {		emote = "oxy", 		stress = math.random(2, 4), heal = 0, armor = 0, type = "drug", effect = { armor = false, health = false, stamina = true, widepupils = false, canOD = true, screen = 1  } },
-	["oxy"] = {				emote = "oxy", 		stress = math.random(2, 4), heal = 0, armor = 0, type = "drug", effect = { armor = false, health = true,  stamina = false, widepupils = false, canOD = false, screen = 1  } },
-	["meth"] = {			emote = "coke", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drug", effect = { armor = false, health = false, stamina = true, widepupils = false, canOD = true, screen = 1  } },
-	--["joint"] = {			emote = "joint", 	stress = math.random(2, 4), heal = 0, armor = 0, type = "drug", effect = { armor = true, health = false, stamina = false, widepupils = false, canOD = true, screen = 1  } },
-]]
+	--[[
+	Example item
+	--["heartstopper"] = {
+		emote = "burger", 							-- Select an emote from below, it has to be in here
+		stress = math.random(1,2),					-- Amount of stress relief, can be 0
+		heal = 0, 									-- Set amount to heal by after consuming
+		armor = 5,									-- Amount of armor to add
+		type = "food",								-- Type: "alcohol" / "drink" / "food"
+		effect = { effect = "healdouble", },		-- The status effect given by the item, "heal" / "healdouble" / "stamina"
+		stats = { hunger = math.random(10,20), },	-- The stats of the item, if not found in the items.lua
+	},
+	]]
 }
 
 Config.Emotes = {
 	["drink"] = {"mp_player_inteat@pnq", "loop", "Drink", AnimationOptions =
 		{ EmoteMoving = true, EmoteDuration = 2500,	}},
-	["whiskeyb"] = {"anim@amb@nightclub@mini@drinking@drinking_shots@ped_b@normal@", "glass_hold", "Whiskey Bottle", AnimationOptions =
-		{ Prop = "prop_cs_whiskey_bottle", PropBone = 60309, PropPlacement = {0.08, 0.0, 0.05, 240.0, -60.0}, 
+	["whiskeyb"] = {"mp_player_intdrink", "loop_bottle", "(Don't Use) Whiskey Bottle", AnimationOptions =
+		{ Prop = "prop_cs_whiskey_bottle", PropBone = 60309, PropPlacement = {0.0, 0.0, 0.0, 0.0, 0.0}, 
+			EmoteMoving = true, EmoteLoop = true }},
+	["rumb"] = {"mp_player_intdrink", "loop_bottle", "(Don't Use) Rum Bottle", AnimationOptions =
+		{ Prop = "prop_rum_bottle", PropBone = 18905, PropPlacement = {0.03, -0.18, 0.10, 240.0, -60.0}, 
+			EmoteMoving = true, EmoteLoop = true }},
+	["icream"] = {"mp_player_intdrink", "loop_bottle", "Irish Cream Bottle", AnimationOptions =
+		{ Prop = "prop_bottle_brandy", PropBone = 18905, PropPlacement = {0.00, -0.26, 0.10, 240.0, -60.0}, 
 			EmoteMoving = true, EmoteLoop = true }}, 
-	["rumb"] = {"anim@amb@nightclub@mini@drinking@drinking_shots@ped_b@normal@", "glass_hold", "Rum Bottle", AnimationOptions =
-		{ Prop = "prop_rum_bottle", PropBone = 60309, PropPlacement = {-0.04, -0.18, 0.12, 240.0, -60.0}, 
+	["ginb"] =  {"mp_player_intdrink", "loop_bottle", "(Don't Use) Gin Bottle", AnimationOptions =
+		{ Prop = "prop_tequila_bottle", PropBone = 18905, PropPlacement = {0.00, -0.26, 0.10, 240.0, -60.0}, 
 			EmoteMoving = true, EmoteLoop = true }}, 
-	["icream"] = {"anim@amb@nightclub@mini@drinking@drinking_shots@ped_b@normal@", "glass_hold", "Irish Cream Bottle", AnimationOptions =
-		{ Prop = "prop_bottle_brandy", PropBone = 60309, PropPlacement = {-0.04, -0.18, 0.12, 240.0, -60.0}, 
-			EmoteMoving = true, EmoteLoop = true }}, 
-	["ginb"] =  {"anim@amb@nightclub@mini@drinking@drinking_shots@ped_b@normal@", "glass_hold", "Gin Bottle", AnimationOptions =
-		{ Prop = "prop_tequila_bottle", PropBone = 60309, PropPlacement = {-0.04, -0.18, 0.12, 240.0, -60.0}, 
-			EmoteMoving = true, EmoteLoop = true }}, 
-	["vodkab"] = {"anim@amb@nightclub@mini@drinking@drinking_shots@ped_b@normal@", "glass_hold", "Vodka Bottle", AnimationOptions =
-		{ Prop = 'prop_vodka_bottle', PropBone = 60309, PropPlacement = {-0.04, -0.18, 0.12, 240.0, -60.0}, 
-			EmoteMoving = true, EmoteLoop = true }},      
+	["vodkab"] = {"mp_player_intdrink", "loop_bottle", "(Don't Use) Vodka Bottle", AnimationOptions =
+		{ Prop = 'prop_vodka_bottle', PropBone = 18905, PropPlacement = {0.00, -0.26, 0.10, 240.0, -60.0}, 
+			EmoteMoving = true, EmoteLoop = true }},
 	["crisps"] = {"amb@world_human_drinking@coffee@male@idle_a", "idle_c", "Chrisps", AnimationOptions =
 		{ Prop = 'v_ret_ml_chips2', PropBone = 28422, PropPlacement = {0.01, -0.05, -0.1, 0.0, 0.0, 90.0},
 			EmoteLoop = true, EmoteMoving = true, }}, 

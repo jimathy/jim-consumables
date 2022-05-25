@@ -64,9 +64,19 @@ function TrevorEffect()
 	StopScreenEffect("DrugsTrevorClownsFightOut")
 end
 
-function HealEffect()
+function HealEffectDouble()
     if not healing then healing = true else return end
     local count = 9
+    while count > 0 do
+        Wait(1000)
+        count = count - 1
+        SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) + 6)
+    end
+    healing = false
+end
+function HealEffect()
+    if not healing then healing = true else return end
+    local count = 4
     while count > 0 do
         Wait(1000)
         count = count - 1
@@ -87,8 +97,6 @@ function StaminaEffect()
     startStamina = 0
     SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 end
-
-
 
 --[[function EcstasyEffect()
     local startStamina = 30
@@ -162,9 +170,10 @@ function CokeBaggyEffect()
     SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
 end]]
 
-
 local consuming = false
 local cancelled = false
+
+local time = math.random(5000, 6000) -- Hpw long it takes to consume something
 
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	local Player = PlayerPedId()
@@ -193,6 +202,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		return
 	end
 	
+	--Emote Stuff
 	if emote.AnimationOptions then
 		if emote.AnimationOptions.EmoteLoop then MovementType = 1
 		if emote.AnimationOptions.EmoteMoving then MovementType = 51
@@ -206,18 +216,20 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	InVehicle = IsPedInAnyVehicle(PlayerPedId(), true)
 	if InVehicle == 1 then MovementType = 51 end
 
+	--Load and Start animation
 	loadAnimDict(animDict)
-	
 	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
-
-	--Prop Spawning
-	local attachProp = CreateObject(GetHashKey(model), 1.0, 1.0, 1.0, 1, 1, 0)
-	AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)	
 	
-	local time = math.random(1000, 2000)
+	--Prop Spawning
+	if model then
+		RequestModel(GetHashKey(model))
+		while not HasModelLoaded(GetHashKey(model)) do Citizen.Wait(1) end
+		local attachProp = CreateObject(GetHashKey(model), 1.0, 1.0, 1.0, 1, 1, 0)
+		AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
+	end
+	
 	
 	TriggerEvent("QBCore:Notify", string..QBCore.Shared.Items[itemName].label.."..", "success", (time + 1000))
-	
 	consuming = true
 	while consuming do
 		if time <= 0 then consuming = false end
@@ -242,8 +254,12 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 			TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + QBCore.Shared.Items[itemName].hunger) end
 
 		if not QBCore.Shared.Items[itemName].thirst and not QBCore.Shared.Items[itemName].hunger then
-			if type == "food" then TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + math.random(10,20)) end
-			if type == "drink" then TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + math.random(10,20)) end
+			local hunger = 0
+			local thirst = 0
+			if Config.Consumables[itemName].stats.hunger then hunger = Config.Consumables[itemName].stats.hunger end
+			TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + hunger)
+			if Config.Consumables[itemName].stats.thirst then thirst = Config.Consumables[itemName].stats.thirst end
+			TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + thirst)
 		end
 		
         if stress then TriggerServerEvent('hud:server:RelieveStress', stress) end
@@ -281,6 +297,9 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 			end
 			if effect.effect == "heal" then
 				HealEffect()
+			end	
+			if effect.effect == "healdouble" then
+				HealEffect()
 			end
 			if effect.effect == "stamina" then
 				StaminaEffect()
@@ -297,6 +316,15 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	end
 	cancelled = false
 	consuming = false
+	for k, v in pairs(GetGamePool('CObject')) do
+		if IsEntityAttachedToEntity(PlayerPedId(), v) then
+			DeleteObject(v)
+			DetachEntity(v, 0, 0)
+			SetEntityAsMissionEntity(v, true, true)
+			Wait(100)
+			DeleteEntity(v)
+		end
+	end
 end)
 
 CreateThread(function()
