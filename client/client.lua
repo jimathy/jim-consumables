@@ -173,9 +173,8 @@ end]]
 local consuming = false
 local cancelled = false
 
-local time = math.random(5000, 6000) -- Hpw long it takes to consume something
-
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
+	local time = math.random(5000, 6000) -- How long it takes to consume something
 	local Player = PlayerPedId()
 	local emote = Config.Emotes[Config.Consumables[itemName].emote]
 	local animDict = tostring(emote[1])
