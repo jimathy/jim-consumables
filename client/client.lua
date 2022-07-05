@@ -12,10 +12,10 @@ function AlienEffect()
     StartScreenEffect("DrugsMichaelAliensFightIn", 3.0, 0)
     Wait(math.random(5000, 8000))
     local ped = PlayerPedId()
-    RequestAnimSet("MOVE_M@DRUNK@VERYDRUNK") 
+    RequestAnimSet("MOVE_M@DRUNK@VERYDRUNK")
     while not HasAnimSetLoaded("MOVE_M@DRUNK@VERYDRUNK") do
       Citizen.Wait(0)
-    end    
+    end
     SetPedCanRagdoll( ped, true )
     ShakeGameplayCam('DRUNK_SHAKE', 2.80)
     SetTimecycleModifier("Drunk")
@@ -35,7 +35,7 @@ function AlienEffect()
     AnimpostfxStopAll()
     ShakeGameplayCam('DRUNK_SHAKE', 0.0)
     StartScreenEffect("DrugsMichaelAliensFight", 3.0, 0)
-    Wait(math.random(45000, 60000))    
+    Wait(math.random(45000, 60000))
     StartScreenEffect("DrugsMichaelAliensFightOut", 3.0, 0)
     StopScreenEffect("DrugsMichaelAliensFightIn")
     StopScreenEffect("DrugsMichaelAliensFight")
@@ -193,14 +193,14 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	if type == "drink" or type == "alcohol" then string = "Drinking " end
 	if type == "food" then string = "Eating " end
 	if type == "drug" then string = "Using " end
-	
+
 	if consuming then
 		cancelled = true
 		TriggerEvent("QBCore:Notify", "Stopped "..string, "error")
 		consuming = not consuming
 		return
 	end
-	
+
 	--Emote Stuff
 	if emote.AnimationOptions then
 		if emote.AnimationOptions.EmoteLoop then MovementType = 1
@@ -218,7 +218,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	--Load and Start animation
 	loadAnimDict(animDict)
 	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
-	
+
 	--Prop Spawning
 	if model then
 		RequestModel(GetHashKey(model))
@@ -226,8 +226,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		local attachProp = CreateObject(GetHashKey(model), 1.0, 1.0, 1.0, 1, 1, 0)
 		AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
 	end
-	
-	
+
+
 	TriggerEvent("QBCore:Notify", string..QBCore.Shared.Items[itemName].label.."..", "success", (time + 1000))
 	consuming = true
 	while consuming do
@@ -239,32 +239,34 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		Wait(10)
 		time = time - 10
 	end
-	
+
 	StopEntityAnim(Player, anim, animDict, 1.0)
 	DeleteEntity(attachProp)
-	
+
 	if not cancelled then
         TriggerEvent("inventory:client:ItemBox", QBCore.Shared.Items[itemName], "remove", 1)
         TriggerServerEvent("QBCore:Server:RemoveItem", itemName, 1)
 
-        if QBCore.Shared.Items[itemName].thirst then 
+        if QBCore.Shared.Items[itemName].thirst then
 			TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + QBCore.Shared.Items[itemName].thirst) end
-        if QBCore.Shared.Items[itemName].hunger then 
+        if QBCore.Shared.Items[itemName].hunger then
 			TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + QBCore.Shared.Items[itemName].hunger) end
 
 		if not QBCore.Shared.Items[itemName].thirst and not QBCore.Shared.Items[itemName].hunger then
 			local hunger = 0
 			local thirst = 0
-			if Config.Consumables[itemName].stats.hunger then hunger = Config.Consumables[itemName].stats.hunger end
-			TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + hunger)
-			if Config.Consumables[itemName].stats.thirst then thirst = Config.Consumables[itemName].stats.thirst end
-			TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + thirst)
+            if if Config.Consumables[itemName].stats then
+                if Config.Consumables[itemName].stats.hunger then hunger = Config.Consumables[itemName].stats.hunger end
+                TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + hunger)
+                if Config.Consumables[itemName].stats.thirst then thirst = Config.Consumables[itemName].stats.thirst end
+                TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + thirst)
+            end
 		end
-		
+
         if stress then TriggerServerEvent('hud:server:RelieveStress', stress) end
-		
+
 		if heal then SetEntityHealth(Player, GetEntityHealth(Player) + heal) end
-				
+
 		if armor then TriggerServerEvent('hospital:server:SetArmor', (GetPedArmour(Player) + armor)) SetPedArmour(Player, (GetPedArmour(Player) + armor)) end
 
 		if type == "alcohol" then
@@ -276,7 +278,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 				AlienEffect()
 			end
         end
-		
+
 		effect = Config.Consumables[itemName].effect
 
 		if effect ~= nil then
@@ -296,7 +298,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 			end
 			if effect.effect == "heal" then
 				HealEffect()
-			end	
+			end
 			if effect.effect == "healdouble" then
 				HealEffect()
 			end
