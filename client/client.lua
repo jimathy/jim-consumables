@@ -255,7 +255,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		if not QBCore.Shared.Items[itemName].thirst and not QBCore.Shared.Items[itemName].hunger then
 			local hunger = 0
 			local thirst = 0
-            if if Config.Consumables[itemName].stats then
+            if Config.Consumables[itemName].stats then
                 if Config.Consumables[itemName].stats.hunger then hunger = Config.Consumables[itemName].stats.hunger end
                 TriggerServerEvent("QBCore:Server:SetMetaData", "hunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + hunger)
                 if Config.Consumables[itemName].stats.thirst then thirst = Config.Consumables[itemName].stats.thirst end
