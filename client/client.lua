@@ -174,6 +174,7 @@ local consuming = false
 local cancelled = false
 
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
+    LocalPlayer.state:set("inv_busy", true, true)
 	local time = math.random(5000, 6000) -- How long it takes to consume something
 	local Player = PlayerPedId()
 	local emote = Config.Emotes[Config.Consumables[itemName].emote]
@@ -196,6 +197,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 
 	if consuming then
 		cancelled = true
+        LocalPlayer.state:set("inv_busy", false, true)
 		TriggerEvent("QBCore:Notify", "Stopped "..string, "error")
 		consuming = not consuming
 		return
@@ -235,6 +237,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		if IsControlJustPressed(0, 21) then
 			consuming = false
 			cancelled = true
+            LocalPlayer.state:set("inv_busy", false, true)
 		end
 		Wait(10)
 		time = time - 10
@@ -326,6 +329,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 			DeleteEntity(v)
 		end
 	end
+    LocalPlayer.state:set("inv_busy", false, true)
 end)
 
 CreateThread(function()
