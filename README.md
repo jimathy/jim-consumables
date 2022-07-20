@@ -15,6 +15,7 @@ To add an item, you only need to add a new item table in the Config.Consumables 
 ```lua
 ["heartstopper"] = {
 	emote = "burger", 							-- Select an emote from below, it has to be in here
+	time = math.random(5000, 6000),				-- Amount of time it takes to consume the item
 	stress = math.random(1,2),					-- Amount of stress relief, can be 0
 	heal = 0, 									-- Set amount to heal by after consuming
 	armor = 5,									-- Amount of armor to add
