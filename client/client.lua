@@ -14,7 +14,7 @@ function AlienEffect()
     local ped = PlayerPedId()
     RequestAnimSet("MOVE_M@DRUNK@VERYDRUNK")
     while not HasAnimSetLoaded("MOVE_M@DRUNK@VERYDRUNK") do
-      Citizen.Wait(0)
+        Citizen.Wait(0)
     end
     SetPedCanRagdoll( ped, true )
     ShakeGameplayCam('DRUNK_SHAKE', 2.80)
@@ -220,18 +220,28 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	--Load and Start animation
 	loadAnimDict(animDict)
 	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
-
-	--Prop Spawning
-	if model then
-		RequestModel(GetHashKey(model))
-		while not HasModelLoaded(GetHashKey(model)) do Citizen.Wait(1) end
-		local attachProp = CreateObject(GetHashKey(model), 1.0, 1.0, 1.0, 1, 1, 0)
-		AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
-	end
-
-
+    
 	TriggerEvent("QBCore:Notify", string..QBCore.Shared.Items[itemName].label.."..", "success", (time + 1000))
 	consuming = true
+
+    CreateThread(function()
+        --Prop Spawning
+        if model then
+            RequestModel(GetHashKey(model))
+            while not HasModelLoaded(GetHashKey(model)) do Citizen.Wait(1) end
+            local attachProp = CreateObject(GetHashKey(model), 1.0, 1.0, 1.0, 1, 1, 0)
+            AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
+            while consuming do
+                Wait(10)
+            end
+            DeleteObject(attachProp)
+            DetachEntity(attachProp, 0, 0)
+            SetEntityAsMissionEntity(attachProp, true, true)
+            Wait(100)
+            DeleteEntity(attachProp)
+        end
+    end)
+
 	while consuming do
 		if time <= 0 then consuming = false end
 		if IsControlJustPressed(0, 21) then
@@ -244,7 +254,6 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	end
 
 	StopEntityAnim(Player, anim, animDict, 1.0)
-	DeleteEntity(attachProp)
 
 	if not cancelled then
         TriggerEvent("inventory:client:ItemBox", QBCore.Shared.Items[itemName], "remove", 1)
@@ -320,7 +329,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	end
 	cancelled = false
 	consuming = false
-	for k, v in pairs(GetGamePool('CObject')) do
+
+	--[[for k, v in pairs(GetGamePool('CObject')) do
 		if IsEntityAttachedToEntity(PlayerPedId(), v) then
 			DeleteObject(v)
 			DetachEntity(v, 0, 0)
@@ -328,7 +338,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 			Wait(100)
 			DeleteEntity(v)
 		end
-	end
+	end]]
+
     LocalPlayer.state:set("inv_busy", false, true)
 end)
 
