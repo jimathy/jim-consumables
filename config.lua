@@ -1,4 +1,4 @@
-print("^2Jim^7-^2Consumables v^41^7.^41 ^7- ^2Consumables Script by ^1Jimathy^7")
+print("^2Jim^7-^2Consumables v^41^7.^42 ^7- ^2Consumables Script by ^1Jimathy^7")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -8,7 +8,9 @@ Config = {
 	Debug = false,
 	Consumables = {
 		-- Default QB food and drink item override
-		["vodka"] = { 			emote = "vodkab", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", stats = { thirst = math.random(10,20), canOD = true }},
+
+		--Effects can be applied here, like stamina on coffee for example
+		["vodka"] = { 			emote = "vodkab", 	time = math.random(5000, 6000), stress = 0, heal = 0, armor = 0, type = "alcohol", stats = { effect = "stress", time = 5000, amount = 2, thirst = math.random(10,20), canOD = true }},
 		["beer"] = { 			emote = "beer", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", stats = { thirst = math.random(10,20), canOD = true }},
 		["whiskey"] = { 		emote = "whiskey",  time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "alcohol", stats = { thirst = math.random(10,20), canOD = true }},
 
@@ -17,37 +19,43 @@ Config = {
 		["snikkel_candy"] = { 	emote = "egobar", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(10,20), }},
 		["tosti"] = { 			emote = "sandwich", time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(10,20), }},
 
-		["coffee"] = { 			emote = "coffee", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { thirst = math.random(10,20), }},
+		["coffee"] = { 			emote = "coffee", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { effect = "stamina", time = 10000, thirst = math.random(10,20), }},
 		["water_bottle"] = { 	emote = "drink", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { thirst = math.random(10,20), }},
 		["kurkakola"] = { 		emote = "ecola", 	time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "drink", stats = { thirst = math.random(10,20), }},
 
 		--[[----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Items that effect status changes, like bleeding can cause problems as they are all handled in their own scripts
 		-- Testing these but they may be best left handled by default scripts
-		["ifaks"] = { 			emote = "oxy", 		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 10, armor = 0, type = "drug", },
-		["bandage"] = { 		emote = "oxy", 		time = math.random(5000, 6000), stress = 0, heal = 10, armor = 0, type = "drug", },
+		["ifaks"] = { 			emote = "oxy", 		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 10, armor = 0, type = "drug", stats = { effect = "heal", amount = 6, widepupils = false, canOD = false } },
+		["bandage"] = { 		emote = "oxy", 		time = math.random(5000, 6000), stress = 0, heal = 10, armor = 0, type = "drug", stats = { effect = "heal", amount = 3, widepupils = false, canOD = false } }, },]]
 
 		--Testing effects & armor with small functionality to drugs - This may be another one left to default scripts
-		["joint"] = { 			emote = "smoke3",	time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "weed", widepupils = false, canOD = false } },
+		["joint"] = { 			emote = "smoke3",	time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { screen = "weed", effect = "armor", widepupils = false, canOD = false } },
 
-		["cokebaggy"] = { 		emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "stamina", widepupils = false, canOD = true } },
-		["crackbaggy"] = { 		emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "heal", widepupils = false, canOD = true } },
-		["xtcbaggy"] = { 		emote = "oxy",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "stamina", widepupils = true, canOD = true } },
-		["oxy"] = { 			emote = "oxy",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "heal", widepupils = false, canOD = false } },
+		["cokebaggy"] = { 		emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 0, type = "drug", stats = { screen = "focus", effect = "stamina", widepupils = false, canOD = true } },
+		--["crackbaggy"] = { 		emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 0, type = "drug", stats = { effect = "heal", widepupils = false, canOD = true } },
+		["xtcbaggy"] = { 		emote = "oxy",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "strength", widepupils = true, canOD = true } },
+		["oxy"] = { 			emote = "oxy",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 0, type = "drug", stats = { effect = "heal", widepupils = false, canOD = false } },
 		["meth"] = { 			emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "stamina", widepupils = false, canOD = true } },
-		----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------]]
+		----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 		--[[
-		Example item
+		--Example item
 		["heartstopper"] = {
 			emote = "burger", 							-- Select an emote from below, it has to be in here
-			time = math.random(5000, 6000),				-- Amount of time it takes to consume the item (if nil, this is the default)
+			time = math.random(5000, 6000),				-- Amount of time it takes to consume the item
 			stress = math.random(1,2),					-- Amount of stress relief, can be 0
 			heal = 0, 									-- Set amount to heal by after consuming
 			armor = 5,									-- Amount of armor to add
 			type = "food",								-- Type: "alcohol" / "drink" / "food"
-			effect = { effect = "healdouble", },		-- The status effect given by the item, "heal" / "healdouble" / "stamina"
-			stats = { hunger = math.random(10,20), },	-- The stats of the item, if not found in the items.lua
+			stats = {
+				screen = "rampage"						-- The screen effect to be played when after consuming the item
+				effect = "heal", 						-- The status effect given by the item, "heal" / "stamina"
+				time = 10000,							-- How long the effect should last (if not added it will default to 10000)
+				amount = 6,								-- How much the value is changed by per second
+				hunger = math.random(10,20),			-- The hunger/thirst stats of the item, if not found in the items.lua
+				thirst = math.random(10,20),			-- The hunger/thirst stats of the item, if not found in the items.lua
+			},
 		},
 		]]
 	},
