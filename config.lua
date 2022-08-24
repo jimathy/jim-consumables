@@ -5,7 +5,7 @@ print("^2Jim^7-^2Consumables v^41^7.^43 ^7- ^2Consumables Script by ^1Jimathy^7"
 -- https://discord.gg/xKgQZ6wZvS
 
 Config = {
-	Debug = true,
+	Debug = false,
 	Consumables = {
 		-- Default QB food and drink item override
 
