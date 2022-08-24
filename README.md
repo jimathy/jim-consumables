@@ -7,6 +7,14 @@ This script is designed as a replacement/override for food and drink consumables
 It's main purpose was to make it possible to not stand up while sitting due to lazy events such as ClearPedTasks in most scripts, this one is designed to cancel the animation you have chosen, not all animations. This includes progressbar.
 
 # Installation
+
+```
+Please stop asking to how add a progressbar...PLEASE
+
+This script was designed to not need one, because of how it cancels all the player animations instantly
+
+You can manage without a progressbar.
+```
 This script is recommended to be ran last/at the bottom of your server.cfg because this is intended to take control of items, if ran too early the original script may override this one.
 
 It already takes control of default qbcore food and drink, but you would probably want to add more.

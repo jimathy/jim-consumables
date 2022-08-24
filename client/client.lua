@@ -4,13 +4,6 @@ PlayerJob = {}
 local alcoholCount = 0
 local drugCount = 0
 
-local time = 40
-function loadModel(model) if not HasModelLoaded(model) then if Config.Debug then print("^5Debug^7: ^2Loading Model^7: '^6"..model.."^7'") end while not HasModelLoaded(model) do if time > 0 then time = time - 1 RequestModel(model) else time = 40 break end Wait(10)	end	end end
-function unloadModel(model) if Config.Debug then print("^5Debug^7: ^2Removing Model^7: '^6"..model.."^7'") end SetModelAsNoLongerNeeded(model) end
-function loadAnimDict(dict)	if Config.Debug then print("^5Debug^7: ^2Loading Anim Dictionary^7: '^6"..dict.."^7'") end while not HasAnimDictLoaded(dict) do RequestAnimDict(dict) Wait(5) end end
-function unloadAnimDict(dict) if Config.Debug then print("^5Debug^7: ^2Removing Anim Dictionary^7: '^6"..dict.."^7'") end RemoveAnimDict(dict) end
-function destroyProp(entity) if Config.Debug then print("^5Debug^7: ^2Destroying Prop^7: '^6"..entity.."^7'") end SetEntityAsMissionEntity(entity) Wait(5) DetachEntity(entity, true, true) Wait(5) DeleteObject(entity) end
-
 --Convert Prop Model Names to Model HashKeys now to be more optimized when loading later
 for k in pairs(Config.Emotes) do
     if Config.Emotes[k].AnimationOptions.Prop then
@@ -18,184 +11,12 @@ for k in pairs(Config.Emotes) do
     end
 end
 
---Screen Effects
-local alienEffect = false
-function AlienEffect()
-    if alienEffect then return end
-    alienEffect = true
-    if Config.Debug then print("^5Debug^7: ^3AlienEffect^7() ^2activated") end
-    AnimpostfxPlay("DrugsMichaelAliensFightIn", 3.0, 0)
-    Wait(math.random(5000, 8000))
-    local Ped = PlayerPedId()
-    local animDict = "MOVE_M@DRUNK@VERYDRUNK"
-    loadAnimDict(animDict)
-    SetPedCanRagdoll(Ped, true)
-    ShakeGameplayCam('DRUNK_SHAKE', 2.80)
-    SetTimecycleModifier("Drunk")
-    SetPedMovementClipset(Ped, animDict, 1)
-    SetPedMotionBlur(Ped, true)
-    SetPedIsDrunk(Ped, true)
-    Wait(1500)
-    SetPedToRagdoll(Ped, 5000, 1000, 1, 0, 0, 0)
-    Wait(13500)
-    SetPedToRagdoll(Ped, 5000, 1000, 1, 0, 0, 0)
-    Wait(120500)
-    ClearTimecycleModifier()
-    ResetScenarioTypesEnabled()
-    ResetPedMovementClipset(Ped, 0)
-    SetPedIsDrunk(Ped, false)
-    SetPedMotionBlur(Ped, false)
-    AnimpostfxStopAll()
-    ShakeGameplayCam('DRUNK_SHAKE', 0.0)
-    AnimpostfxPlay("DrugsMichaelAliensFight", 3.0, 0)
-    Wait(math.random(45000, 60000))
-    AnimpostfxPlay("DrugsMichaelAliensFightOut", 3.0, 0)
-    AnimpostfxStop("DrugsMichaelAliensFightIn")
-    AnimpostfxStop("DrugsMichaelAliensFight")
-    AnimpostfxStop("DrugsMichaelAliensFightOut")
-    alienEffect = false
-    if Config.Debug then print("^5Debug^7: ^3AlienEffect^7() ^2stopped") end
-end
-local weedEffect = false
-function WeedEffect()
-    if weedEffect then return end
-    weedEffect = true
-    if Config.Debug then print("^5Debug^7: ^3WeedEffect^7() ^2activated") end
-    AnimpostfxPlay("DrugsMichaelAliensFightIn", 3.0, 0)
-    Wait(math.random(3000, 20000))
-    AnimpostfxPlay("DrugsMichaelAliensFight", 3.0, 0)
-    Wait(math.random(15000, 20000))
-    AnimpostfxPlay("DrugsMichaelAliensFightOut", 3.0, 0)
-    AnimpostfxStop("DrugsMichaelAliensFightIn")
-    AnimpostfxStop("DrugsMichaelAliensFight")
-    AnimpostfxStop("DrugsMichaelAliensFightOut")
-    weedEffect = false
-    if Config.Debug then print("^5Debug^7: ^3WeedEffect^7() ^2stopped") end
-end
-local trevorEffect = false
-function TrevorEffect()
-    if trevorEffect then return end
-    if Config.Debug then print("^5Debug^7: ^3TrevorEffect^7() ^2activated") end
-    trevorEffect = true
-    AnimpostfxPlay("DrugsTrevorClownsFightIn", 3.0, 0)
-    Wait(3000)
-    AnimpostfxPlay("DrugsTrevorClownsFight", 3.0, 0)
-    Wait(30000)
-	AnimpostfxPlay("DrugsTrevorClownsFightOut", 3.0, 0)
-	AnimpostfxStop("DrugsTrevorClownsFight")
-	AnimpostfxStop("DrugsTrevorClownsFightIn")
-	AnimpostfxStop("DrugsTrevorClownsFightOut")
-    trevorEffect = false
-    if Config.Debug then print("^5Debug^7: ^3TrevorEffect^7() ^2stopped") end
-end
-local turboEffect = false
-function TurboEffect()
-    if turboEffect then return end
-    if Config.Debug then print("^5Debug^7: ^3TurboEffect^7() ^2activated") end
-    turboEffect = true
-    AnimpostfxPlay('RaceTurbo', 0, true)
-    SetTimecycleModifier('rply_motionblur')
-    ShakeGameplayCam('SKY_DIVING_SHAKE', 0.25)
-    Wait(30000)
-    StopGameplayCamShaking(true)
-    SetTransitionTimecycleModifier('default', 0.35)
-    Wait(1000)
-    ClearTimecycleModifier()
-    AnimpostfxStop('RaceTurbo')
-    turboEffect = false
-    if Config.Debug then print("^5Debug^7: ^3TurboEffect^7() ^2stopped") end
-end
-local rampageEffect = false
-function RampageEffect()
-    if rampageEffect then return end
-    if Config.Debug then print("^5Debug^7: ^3RampageEffect^7() ^2activated") end
-    rampageEffect = true
-    AnimpostfxPlay('Rampage', 0, true)
-    SetTimecycleModifier('rply_motionblur')
-    ShakeGameplayCam('SKY_DIVING_SHAKE', 0.25)
-    Wait(30000)
-    StopGameplayCamShaking(true)
-    SetTransitionTimecycleModifier('default', 0.35)
-    Wait(1000)
-    ClearTimecycleModifier()
-    AnimpostfxStop('Rampage')
-    rampageEffect = false
-    if Config.Debug then print("^5Debug^7: ^3RampageEffect^7() ^2stopped") end
-end
-local focusEffect = false
-function FocusEffect()
-    if focusEffect then return end
-    if Config.Debug then print("^5Debug^7: ^3FocusEffect^7() ^2activated") end
-    focusEffect = true
-    AnimpostfxPlay('FocusIn', 0, true)
-    Wait(30000)
-    Wait(1000)
-    AnimpostfxStop('FocusIn')
-    focusEffect = false
-    if Config.Debug then print("^5Debug^7: ^3FocusEffect^7() ^2stopped") end
-end
-
---Built-in Buff effects
-local healEffect = false
-function HealEffect(data)
-    if healEffect then return end
-    if Config.Debug then print("^5Debug^7: ^3HealEffect^7() ^2activated") end
-    healEffect = true
-    local count = (data[1] / 1000)
-    while count > 0 do
-        Wait(1000)
-        count = count - 1
-        SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) + data[2])
-    end
-    healEffect = false
-    if Config.Debug then print("^5Debug^7: ^3HealEffect^7() ^2stopped") end
-end
-
-local staminaEffect = false
-function StaminaEffect(data)
-    if staminaEffect then return end
-    if Config.Debug then print("^5Debug^7: ^3StaminaEffect^7() ^2activated") end
-    staminaEffect = true
-    local startStamina = (data[1] / 1000)
-    SetRunSprintMultiplierForPlayer(PlayerId(), 1.49)
-    while startStamina > 0 do
-        Wait(1000)
-        if math.random(5, 100) < 10 then RestorePlayerStamina(PlayerId(), data[2]) end
-        startStamina = startStamina - 1
-        if math.random(5, 100) < 51 then end
-    end
-    startStamina = 0
-    SetRunSprintMultiplierForPlayer(PlayerId(), 1.0)
-    staminaEffect = false
-    if Config.Debug then print("^5Debug^7: ^3StaminaEffect^7() ^2stopped") end
-end
-
-function StopEffects()
-    if Config.Debug then print("^5Debug^7: ^2All screen effects stopped") end
-    ShakeGameplayCam('DRUNK_SHAKE', 0.0)
-    SetPedToRagdoll(PlayerPedId(), 5000, 1000, 1, 0, 0, 0)
-    ClearTimecycleModifier()
-    ResetScenarioTypesEnabled()
-    ResetPedMovementClipset(PlayerPedId(), 0)
-    SetPedIsDrunk(PlayerPedId(), false)
-    SetPedMotionBlur(PlayerPedId(), false)
-    AnimpostfxStop("DrugsMichaelAliensFightIn")
-    AnimpostfxStop("DrugsMichaelAliensFight")
-    AnimpostfxStop("DrugsMichaelAliensFightOut")
-	AnimpostfxStop("DrugsTrevorClownsFight")
-	AnimpostfxStop("DrugsTrevorClownsFightIn")
-	AnimpostfxStop("DrugsTrevorClownsFightOut")
-    AnimpostfxStop('RaceTurbo')
-    AnimpostfxStop('FocusIn')
-    AnimpostfxStop('Rampage')
-end
-
 local consuming = false
 local cancelled = false
 
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
-    LocalPlayer.state:set("inv_busy", true, true)
+    LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', true)
 	local Player = PlayerPedId()
 	local emote = Config.Emotes[Config.Consumables[itemName].emote]
 	local animDict = tostring(emote[1])
@@ -220,7 +41,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		cancelled = true
         if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.") end
         LocalPlayer.state:set("inv_busy", false, true)
-		TriggerEvent("QBCore:Notify", "Stopped "..string, "error")
+		triggerNotify(nil, "Stopped "..string, "error")
 		consuming = not consuming
 		return
 	end
@@ -246,15 +67,14 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	loadAnimDict(animDict)
 	TaskPlayAnim(PlayerPedId(), animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
 
-	TriggerEvent("QBCore:Notify", string..QBCore.Shared.Items[itemName].label.."..", "success", (time + 1000))
+	triggerNotify(nil, string..QBCore.Shared.Items[itemName].label.."..", "success")
 	consuming = true
 
     CreateThread(function()
         --Prop Spawning
         if model then
             if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Spawning consumable prop^7.") end
-            loadModel(model)
-            local attachProp = CreateObject(model, 1.0, 1.0, 1.0, 1, 1, 0)
+            local attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
             AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
             while consuming do Wait(100) end
             destroyProp(attachProp)
@@ -276,8 +96,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
     unloadAnimDict(animDict)
 
 	if not cancelled then
-        TriggerServerEvent("QBCore:Server:RemoveItem", itemName, 1)
-        TriggerEvent("inventory:client:ItemBox", QBCore.Shared.Items[itemName], "remove", 1)
+
+        toggleItem(false, itemName, 1)
 
         if QBCore.Shared.Items[itemName].thirst then
 			TriggerServerEvent("QBCore:Server:SetMetaData", "thirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + QBCore.Shared.Items[itemName].thirst) end
@@ -367,8 +187,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	cancelled = false
 	consuming = false
 
-    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Finished, unlocking inventory^7..") end
-    LocalPlayer.state:set("inv_busy", false, true)
+    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Finished, unlocking inventory^7...") end
+    LocalPlayer.state:set("inv_busy", false, true) TriggerEvent('inventory:client:busy:status', false) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
 end)
 
 CreateThread(function()
@@ -378,20 +198,15 @@ CreateThread(function()
             Wait(1000 * 60 * 15)
             alcoholCount = alcoholCount - 1
         else
-            Wait(2000)
+            Wait(1000)
         end
-	end
-end)
-CreateThread(function()
-	while true do
-        Wait(10)
         if drugCount > 0 then
             Wait(1000 * 60 * 15)
             drugCount = drugCount - 1
         else
-            Wait(2000)
+            Wait(1000)
         end
-    end
+	end
 end)
 
 AddEventHandler('onResourceStop', function(r) if r ~= GetCurrentResourceName() then return end
