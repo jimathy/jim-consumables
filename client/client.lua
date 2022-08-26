@@ -86,6 +86,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 cancelled = true
                 LocalPlayer.state:set("inv_busy", false, true)
                 if Config.UseProgbar then
+                    Wait(10)
                     TriggerEvent("progressbar:client:cancel")
                 else
                     triggerNotify(nil, "Cancelled "..string, "error")
