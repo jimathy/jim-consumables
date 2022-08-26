@@ -23,6 +23,7 @@ To add an item, you only need to add a new item table in the Config.Consumables 
 ```lua
 ["heartstopper"] = {
 	emote = "burger",			-- Select an emote from below, it has to be in here
+	canRun = false, 			--To restrict a player can run while consuming on particuller item eg. default is false make it true if you wanna restrict running 
 	time = math.random(5000, 6000),		-- Amount of time it takes to consume the item
 	stress = math.random(1,2),		-- Amount of stress relief, can be 0
 	heal = 0,				-- Set amount to heal by after consuming
