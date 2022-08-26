@@ -40,7 +40,11 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		cancelled = true
         if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.") end
         LocalPlayer.state:set("inv_busy", false, true)
-		triggerNotify(nil, "Stopped "..string, "error")
+        if Config.UseProgbar then
+            TriggerEvent("progressbar:client:cancel")
+        else
+            triggerNotify(nil, "Stopped "..string, "error")
+        end
 		consuming = not consuming
 		return
 	end
