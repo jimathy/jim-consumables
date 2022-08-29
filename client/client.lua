@@ -150,6 +150,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 if stats.screen == "rampage" then CreateThread(function() RampageEffect() end) end
                 if stats.screen == "weed" then CreateThread(function() WeedEffect() end) end
                 if stats.screen == "trevor" then CreateThread(function() TrevorEffect() end) end
+                if stats.screen == "nightvision" then CreateThread(function() NightVisionEffect() end) end
+                if stats.screen == "thermal" then CreateThread(function() ThermalEffect() end) end
             end
 
 			if stats.canOD then
@@ -164,11 +166,11 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 				end
 			end
 			if stats.effect == "heal" then
-                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:AddHealthBuff((stats.effect.time or 10000), (stats.amount or 6))
+                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:AddHealthBuff((stats.time or 10000), (stats.amount or 6))
                 else CreateThread(function() HealEffect({(stats.effect.time or 10000), (stats.amount or 6)}) end) end
             end
 			if stats.effect == "stamina" then
-                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:StaminaBuffEffect((stats.effect.time or 10000), (stats.amount or 6))
+                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:StaminaBuffEffect((stats.time or 10000), (stats.amount or 6))
                 else CreateThread(function() StaminaEffect({(stats.effect.time or 10000), (stats.amount or 6)}) end) end
 			end
             if GetResourceState("ps-buffs") == "started" then   --PS-BUFFS ONLY

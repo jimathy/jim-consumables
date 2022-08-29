@@ -58,8 +58,7 @@ function toggleItem(give, item, amount) TriggerServerEvent("jim-consumables:serv
 --Screen Effects
 local alienEffect = false
 function AlienEffect()
-    if alienEffect then return end
-    alienEffect = true
+    if alienEffect then return else alienEffect = true end
     if Config.Debug then print("^5Debug^7: ^3AlienEffect^7() ^2activated") end
     AnimpostfxPlay("DrugsMichaelAliensFightIn", 3.0, 0)
     Wait(math.random(5000, 8000))
@@ -95,7 +94,7 @@ function AlienEffect()
 end
 local weedEffect = false
 function WeedEffect()
-    if weedEffect then return end
+    if weedEffect then return else weedEffect = true end
     weedEffect = true
     if Config.Debug then print("^5Debug^7: ^3WeedEffect^7() ^2activated") end
     AnimpostfxPlay("DrugsMichaelAliensFightIn", 3.0, 0)
@@ -111,9 +110,8 @@ function WeedEffect()
 end
 local trevorEffect = false
 function TrevorEffect()
-    if trevorEffect then return end
+    if trevorEffect then return else trevorEffect = true end
     if Config.Debug then print("^5Debug^7: ^3TrevorEffect^7() ^2activated") end
-    trevorEffect = true
     AnimpostfxPlay("DrugsTrevorClownsFightIn", 3.0, 0)
     Wait(3000)
     AnimpostfxPlay("DrugsTrevorClownsFight", 3.0, 0)
@@ -127,9 +125,8 @@ function TrevorEffect()
 end
 local turboEffect = false
 function TurboEffect()
-    if turboEffect then return end
+    if turboEffect then return else turboEffect = true end
     if Config.Debug then print("^5Debug^7: ^3TurboEffect^7() ^2activated") end
-    turboEffect = true
     AnimpostfxPlay('RaceTurbo', 0, true)
     SetTimecycleModifier('rply_motionblur')
     ShakeGameplayCam('SKY_DIVING_SHAKE', 0.25)
@@ -144,9 +141,8 @@ function TurboEffect()
 end
 local rampageEffect = false
 function RampageEffect()
-    if rampageEffect then return end
+    if rampageEffect then return else rampageEffect = true end
     if Config.Debug then print("^5Debug^7: ^3RampageEffect^7() ^2activated") end
-    rampageEffect = true
     AnimpostfxPlay('Rampage', 0, true)
     SetTimecycleModifier('rply_motionblur')
     ShakeGameplayCam('SKY_DIVING_SHAKE', 0.25)
@@ -161,15 +157,37 @@ function RampageEffect()
 end
 local focusEffect = false
 function FocusEffect()
-    if focusEffect then return end
+    if focusEffect then return else focusEffect = true end
     if Config.Debug then print("^5Debug^7: ^3FocusEffect^7() ^2activated") end
-    focusEffect = true
+    Wait(1000)
     AnimpostfxPlay('FocusIn', 0, true)
     Wait(30000)
-    Wait(1000)
     AnimpostfxStop('FocusIn')
     focusEffect = false
     if Config.Debug then print("^5Debug^7: ^3FocusEffect^7() ^2stopped") end
+end
+local NightVisionEffect = false
+function NightVisionEffect()
+    if NightVisionEffect then return else NightVisionEffect = true end
+    if Config.Debug then print("^5Debug^7: ^3NightVisionEffect^7() ^2activated") end
+    SetNightvision(true)
+    Wait(math.random(3000, 4000))  -- FEEL FREE TO CHANGE THIS
+    SetNightvision(false)
+    SetSeethrough(false)
+    NightVisionEffect = false
+    if Config.Debug then print("^5Debug^7: ^3NightVisionEffect^7() ^2stopped") end
+end
+local thermalEffect = false
+function ThermalEffect()
+    if thermalEffect then return else thermalEffect = true end
+    if Config.Debug then print("^5Debug^7: ^3ThermalEffect^7() ^2activated") end
+    SetNightvision(true)
+    SetSeethrough(true)
+    Wait(math.random(2000, 3000))  -- FEEL FREE TO CHANGE THIS
+    SetNightvision(false)
+    SetSeethrough(false)
+    thermalEffect = false
+    if Config.Debug then print("^5Debug^7: ^3ThermalEffect^7() ^2stopped") end
 end
 
 --Built-in Buff effects
@@ -207,7 +225,7 @@ function StaminaEffect(data)
     if Config.Debug then print("^5Debug^7: ^3StaminaEffect^7() ^2stopped") end
 end
 
-function StopEffects()
+function StopEffects() -- Used to clear up any effects stuck on screen
     if Config.Debug then print("^5Debug^7: ^2All screen effects stopped") end
     ShakeGameplayCam('DRUNK_SHAKE', 0.0)
     SetPedToRagdoll(PlayerPedId(), 5000, 1000, 1, 0, 0, 0)
@@ -216,6 +234,8 @@ function StopEffects()
     ResetPedMovementClipset(PlayerPedId(), 0)
     SetPedIsDrunk(PlayerPedId(), false)
     SetPedMotionBlur(PlayerPedId(), false)
+    SetNightvision(false)
+    SetSeethrough(false)
     AnimpostfxStop("DrugsMichaelAliensFightIn")
     AnimpostfxStop("DrugsMichaelAliensFight")
     AnimpostfxStop("DrugsMichaelAliensFightOut")
