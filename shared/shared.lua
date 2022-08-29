@@ -95,7 +95,6 @@ end
 local weedEffect = false
 function WeedEffect()
     if weedEffect then return else weedEffect = true end
-    weedEffect = true
     if Config.Debug then print("^5Debug^7: ^3WeedEffect^7() ^2activated") end
     AnimpostfxPlay("DrugsMichaelAliensFightIn", 3.0, 0)
     Wait(math.random(3000, 20000))
