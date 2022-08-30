@@ -146,6 +146,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 if stats.screen == "rampage" then CreateThread(function() RampageEffect() end) end
                 if stats.screen == "weed" then CreateThread(function() WeedEffect() end) end
                 if stats.screen == "trevor" then CreateThread(function() TrevorEffect() end) end
+                if stats.screen == "nightvision" then CreateThread(function() NightVisionEffect() end) end
+                if stats.screen == "thermal" then CreateThread(function() ThermalEffect() end) end
             end
 			if stats.canOD then
                 if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..(drugCount + 1)) end
@@ -159,20 +161,20 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 				end
 			end
 			if stats.effect == "heal" then
-                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:AddHealthBuff((stats.effect.time or 10000), (stats.amount or 6))
-                else CreateThread(function() HealEffect({(stats.effect.time or 10000), (stats.amount or 6)}) end) end
+                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:AddHealthBuff((stats.time or 10000), (stats.amount or 6))
+                else CreateThread(function() HealEffect({(stats.time or 10000), (stats.amount or 6)}) end) end
             end
 			if stats.effect == "stamina" then
-                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:StaminaBuffEffect((stats.effect.time or 10000), (stats.amount or 6))
-                else CreateThread(function() StaminaEffect({(stats.effect.time or 10000), (stats.amount or 6)}) end) end
+                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:StaminaBuffEffect((stats.time or 10000), (stats.amount or 6))
+                else CreateThread(function() StaminaEffect({(stats.time or 10000), (stats.amount or 6)}) end) end
 			end
             if GetResourceState("ps-buffs") == "started" then   --PS-BUFFS ONLY
                 if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs") end
-                if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((stats.effect.time or 10000), (stats.amount or 6)) end
+                if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((stats.time or 10000), (stats.amount or 6)) end
                 if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((stats.time or 10000), (stats.amount or 6)) end
-                if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((stats.effect.time or 10000), (stats.amount or 6)) end
-                if stats.effect == "hacking" then exports["ps-buffs"]:AddBuff("hacking", (stats.effect.time or 10000)) end
-                if stats.effect == "intelligence" then exports["ps-buffs"]:AddBuff("intelligence", (stats.effect.time or 10000)) end
+                if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((stats.time or 10000), (stats.amount or 6)) end
+                if stats.effect == "hacking" then exports["ps-buffs"]:AddBuff("hacking", (stats.time or 10000)) end
+                if stats.effect == "intelligence" then exports["ps-buffs"]:AddBuff("intelligence", (stats.time or 10000)) end
                 if stats.effect == "luck" then exports["ps-buffs"]:AddBuff("luck", (stats.time or 10000)) end
                 if stats.effect == "strength" then exports["ps-buffs"]:AddBuff("strength", (stats.time or 10000)) end
             end

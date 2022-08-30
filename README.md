@@ -23,14 +23,13 @@ To add an item, you only need to add a new item table in the Config.Consumables 
 ```lua
 ["heartstopper"] = {
 	emote = "burger",			-- Select an emote from below, it has to be in here
-	canRun = false, 			--To restrict a player can run while consuming on particuller item eg. default is false make it true if you wanna restrict running 
 	time = math.random(5000, 6000),		-- Amount of time it takes to consume the item
-	stress = math.random(1,2),		-- Amount of stress relief, can be 0
+	stress = math.random(1, 2),		-- Amount of stress relief, can be 0
 	heal = 0,				-- Set amount to heal by after consuming
 	armor = 5,				-- Amount of armor to add
 	type = "food",				-- Type: "alcohol" / "drink" / "food"
 	stats = {
-		screen = "rampage"		-- The screen effect to be played when after consuming the item
+		screen = "rampage",		-- The screen effect to be played when after consuming the item
 		effect = "heal", 		-- The status effect given by the item, "heal" / "stamina"
 		time = 10000,			-- How long the effect should last (if not added it will default to 10000)
 		amount = 2,			-- How much the value is changed by per second
@@ -43,12 +42,14 @@ Consuming an item can also manually activate screen effects
 
 The example above uses `rampage` as this is what the effect is named after, you can use it for any item you think best
 ```lua
---The current list of effects are:
+--The current list of screen effects are:
 	"turbo"
 	"focus"
 	"rampage"
 	"weed"
 	"trevor"
+	"nightvision"
+	"thermal"
 ```
 
 ## PS-Buffs Support

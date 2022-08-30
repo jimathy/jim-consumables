@@ -1,4 +1,4 @@
-print("^2Jim^7-^2Consumables v^41^7.^43 ^7- ^2Consumables Script by ^1Jimathy^7")
+print("^2Jim^7-^2Consumables ^7v^41^7.^43^7.^41 ^7- ^2Consumables Script by ^1Jimathy^7")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
@@ -6,7 +6,7 @@ print("^2Jim^7-^2Consumables v^41^7.^43 ^7- ^2Consumables Script by ^1Jimathy^7"
 
 Config = {
 	Debug = false,
-	Notify = 'qb',
+	Notify = "qb",
 	UseProgbar = false,
 	Consumables = {
 		-- Default QB food and drink item override
@@ -42,9 +42,9 @@ Config = {
 		["meth"] = { 			emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "stamina", widepupils = false, canOD = true } },
 		----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-		--[[
+
 		--Example item
-		["heartstopper"] = {
+		--[[ ["heartstopper"] = {
 			emote = "burger", 							-- Select an emote from below, it has to be in here
 			time = math.random(5000, 6000),				-- Amount of time it takes to consume the item
 			stress = math.random(1,2),					-- Amount of stress relief, can be 0
@@ -52,15 +52,15 @@ Config = {
 			armor = 5,									-- Amount of armor to add
 			type = "food",								-- Type: "alcohol" / "drink" / "food"
 			stats = {
-				screen = "rampage"						-- The screen effect to be played when after consuming the item
+				screen = "rampage",						-- The screen effect to be played when after consuming the item
 				effect = "heal", 						-- The status effect given by the item, "heal" / "stamina"
 				time = 10000,							-- How long the effect should last (if not added it will default to 10000)
 				amount = 6,								-- How much the value is changed by per second
 				hunger = math.random(10,20),			-- The hunger/thirst stats of the item, if not found in the items.lua
 				thirst = math.random(10,20),			-- The hunger/thirst stats of the item, if not found in the items.lua
 			},
-		},
-		]]
+		}, ]]
+
 	},
 	Emotes = {
 		["drink"] = {"mp_player_intdrink", "loop_bottle", "Drink", AnimationOptions =
