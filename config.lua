@@ -8,6 +8,7 @@ Config = {
 	Debug = false,
 	Notify = "qb",
 	UseProgbar = false,
+
 	Consumables = {
 		-- Default QB food and drink item override
 
