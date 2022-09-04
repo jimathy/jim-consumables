@@ -16,7 +16,7 @@ local cancelled = false
 
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
-    LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', true)
+    LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
 	local Player = PlayerPedId()
 	local emote = Config.Emotes[Config.Consumables[itemName].emote]
 	local animDict = tostring(emote[1])
@@ -186,7 +186,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	cancelled = false
 	consuming = false
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Finished, unlocking inventory^7...") end
-    LocalPlayer.state:set("inv_busy", false, true) TriggerEvent('inventory:client:busy:status', false) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
+    LocalPlayer.state:set("inv_busy", false, true) TriggerEvent('inventory:client:busy:status', false) TriggerEvent('canUseInventoryAndHotbar:toggle', true)
 end)
 
 CreateThread(function()
