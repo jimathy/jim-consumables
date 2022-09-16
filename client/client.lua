@@ -8,11 +8,15 @@ local drugCount = 0
 for k in pairs(Config.Emotes) do
     if Config.Emotes[k].AnimationOptions.Prop then
         Config.Emotes[k].AnimationOptions.Prop = GetHashKey(Config.Emotes[k].AnimationOptions.Prop)
+        if Config.Emotes[k].AnimationOptions.SecondProp then
+            Config.Emotes[k].AnimationOptions.SecondProp = GetHashKey(Config.Emotes[k].AnimationOptions.SecondProp)
+        end
     end
 end
 
 local consuming = false
 local cancelled = false
+local attachProp, attachProp2
 
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
@@ -21,13 +25,19 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	local emote = Config.Emotes[Config.Consumables[itemName].emote]
 	local animDict = tostring(emote[1])
 	local anim = tostring(emote[2])
-	local model, bone, drugeffect, stress
+	local model,model2, bone,bone2, drugeffect, stress
 	local P1, P2, P3, P4, P5, P6 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0})
+	local P12, P22, P32, P42, P52, P62 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0})
 	if emote.AnimationOptions.Prop then
 		model = emote.AnimationOptions.Prop
 		bone = GetPedBoneIndex(PlayerPedId(), emote.AnimationOptions.PropBone)
 		P1, P2, P3, P4, P5, P6 = table.unpack(emote.AnimationOptions.PropPlacement)
-	end
+        if emote.AnimationOptions.SecondProp then
+            model2 = emote.AnimationOptions.SecondProp
+            bone2 = GetPedBoneIndex(PlayerPedId(), emote.AnimationOptions.SecondPropBone)
+            P12, P22, P32, P42, P52, P62 = table.unpack(emote.AnimationOptions.SecondPropPlacement)
+        end
+    end
 	local time = Config.Consumables[itemName].time or math.random(5000, 6000)
 	local type = Config.Consumables[itemName].type or "food"
 	local stress = Config.Consumables[itemName].stress or 0
@@ -78,10 +88,15 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
         --Prop Spawning
         if model then
             if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Spawning consumable prop^7.") end
-            local attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+            attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
             AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
+            if model2 then
+                attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                AttachEntityToEntity(attachProp2, PlayerPedId(), bone2, P12, P22, P32, P42, P52, P62, true, true, false, true, 1, true)
+            end
             while consuming do Wait(100) end
             destroyProp(attachProp)
+            if model2 then destroyProp(attachProp2) end
         end
     end)
 	while consuming do
@@ -100,7 +115,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
             end
         end
         Wait(10)
-        time = time - 10
+        time -= 10
 	end
 	StopEntityAnim(PlayerPedId(), anim, animDict, 1.0)
     unloadAnimDict(animDict)
@@ -194,13 +209,13 @@ CreateThread(function()
         Wait(10)
         if alcoholCount > 0 then
             Wait(1000 * 60 * 15)
-            alcoholCount = alcoholCount - 1
+            alcoholCount -= 1
         else
             Wait(1000)
         end
         if drugCount > 0 then
             Wait(1000 * 60 * 15)
-            drugCount = drugCount - 1
+            drugCount -= 1
         else
             Wait(1000)
         end

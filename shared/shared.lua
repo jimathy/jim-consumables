@@ -5,7 +5,7 @@ local time = 1000
 function loadModel(model) if not HasModelLoaded(model) then
 	if Config.Debug then print("^5Debug^7: ^2Loading Model^7: '^6"..model.."^7'") end
 	while not HasModelLoaded(model) do
-		if time > 0 then time = time - 1 RequestModel(model)
+		if time > 0 then time -= 1 RequestModel(model)
 		else time = 1000 print("^5Debug^7: ^3LoadModel^7: ^2Timed out loading model ^7'^6"..model.."^7'") break
 		end
 		Wait(10)
@@ -198,7 +198,7 @@ function HealEffect(data)
     local count = (data[1] / 1000)
     while count > 0 do
         Wait(1000)
-        count = count - 1
+        count -= 1
         SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) + data[2])
     end
     healEffect = false
@@ -215,7 +215,7 @@ function StaminaEffect(data)
     while startStamina > 0 do
         Wait(1000)
         if math.random(5, 100) < 10 then RestorePlayerStamina(PlayerId(), data[2]) end
-        startStamina = startStamina - 1
+        startStamina -= 1
         if math.random(5, 100) < 51 then end
     end
     startStamina = 0
