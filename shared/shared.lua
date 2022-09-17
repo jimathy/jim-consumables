@@ -51,7 +51,7 @@ function triggerNotify(title, message, type, src)
 	end
 end
 
-function countTable(table) local i = 0 for keys in pairs(table) do i = i + 1 end return i end
+function countTable(table) local i = 0 for keys in pairs(table) do i += 1 end return i end
 
 function toggleItem(give, item, amount) TriggerServerEvent("jim-consumables:server:toggleItem", give, item, amount) end
 
