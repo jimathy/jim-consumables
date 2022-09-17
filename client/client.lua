@@ -75,7 +75,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	TaskPlayAnim(PlayerPedId(), animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
 
     if Config.UseProgbar then
-        QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false,disableCarMovement = false,disableMouse = false,disableCombat = true,}, {}, {}, {}, function() end, function() end, itemName)
+        QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName)
     else
         triggerNotify(nil, string..QBCore.Shared.Items[itemName].label.."..", "success")
     end
@@ -104,7 +104,6 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 cancelled = true
                 LocalPlayer.state:set("inv_busy", false, true)
                 if Config.UseProgbar then
-                    Wait(10)
                     TriggerEvent("progressbar:client:cancel")
                 else
                     triggerNotify(nil, "Cancelled "..string, "error")
