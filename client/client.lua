@@ -83,18 +83,22 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	consuming = true
     CreateThread(function()
         --Prop Spawning
-        if model and IsModelValid(model) == 1 then
-            if Config.Debug then print("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7.") end
-                attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
-                AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
-                if model2 and IsModelValid(model2) == 1 then
-                    attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
-                    AttachEntityToEntity(attachProp2, PlayerPedId(), bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
-                else print("^5Debug^7: ^3Consume^7: ^2Second prop model isn't valid/found^7.") end
-                while consuming do Wait(50) end
-                if DoesEntityExist(attachProp) then destroyProp(attachProp) attachProp = nil end
-                if DoesEntityExist(attachProp2) then destroyProp(attachProp2) attackProp = nil end
-            else print("^5Debug^7: ^3PropSpawnstop^7: ^2Prop model isn't valid/found^7.") end
+        if model then
+            if IsModelValid(model) == 1 then
+                if Config.Debug then print("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7.") end
+                    attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                    AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
+                    if model2 then
+                        if IsModelValid(model2) == 1 then
+                            attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                            AttachEntityToEntity(attachProp2, PlayerPedId(), bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
+                        else print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.") end
+                    end
+                    while consuming do Wait(50) end
+                    if DoesEntityExist(attachProp) then destroyProp(attachProp) attachProp = nil end
+                    if DoesEntityExist(attachProp2) then destroyProp(attachProp2) attachProp2 = nil end
+            else print("^5Debug^7: ^3PropSpawn^7: ^2Prop model isn't valid/found^7.") end
+        end
         end)
 	while consuming do
 		if time <= 0 then consuming = false end
