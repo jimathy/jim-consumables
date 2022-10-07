@@ -26,9 +26,12 @@ end
 
 function makeProp(data, freeze, synced)
     loadModel(data.prop)
-    local prop = CreateObject(data.prop, data.coords.x, data.coords.y, data.coords.z-1.03, synced or false, synced or false, 0)
+    local prop = CreateObject(data.prop, data.coords.x, data.coords.y, data.coords.z-1.03, synced or false, synced or false, false)
     SetEntityHeading(prop, data.coords.w+180.0)
-    FreezeEntityPosition(prop, freeze or 0)
+    FreezeEntityPosition(prop, freeze or false)
+    SetEntityCompletelyDisableCollision(prop, true, false)
+    DisableCamCollisionForEntity(prop)
+    DisableCamCollisionForObject(prop)
     if Config.Debug then print("^5Debug^7: ^6Prop ^2Created ^7: '^6"..prop.."^7'") end
     return prop
 end
