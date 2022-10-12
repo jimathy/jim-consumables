@@ -20,15 +20,15 @@ function unloadPtfxDict(dict) if Config.Debug then print("^5Debug^7: ^2Removing 
 function destroyProp(entity)
 	if Config.Debug then print("^5Debug^7: ^2Destroying Prop^7: '^6"..entity.."^7'") end
 	SetEntityAsMissionEntity(entity) Wait(5)
-	DetachEntity(entity, true, true) Wait(5)
+	--DetachEntity(entity, true, true) Wait(5)
 	DeleteObject(entity)
 end
 
 function makeProp(data, freeze, synced)
     loadModel(data.prop)
-    local prop = CreateObject(data.prop, data.coords.x, data.coords.y, data.coords.z-1.03, synced or false, synced or false, false)
+    local prop = CreateObject(data.prop, 0.0, 0.0, 0.0, synced or false, synced or false, false)
     SetEntityHeading(prop, data.coords.w+180.0)
-    FreezeEntityPosition(prop, freeze or false)
+    --FreezeEntityPosition(prop, freeze or false)
     SetEntityCompletelyDisableCollision(prop, true, false)
     DisableCamCollisionForEntity(prop)
     DisableCamCollisionForObject(prop)
