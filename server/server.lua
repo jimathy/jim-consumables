@@ -13,6 +13,8 @@ RegisterNetEvent('jim-consumables:server:toggleItem', function(give, item, amoun
 			TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "remove", amount or 1)
 		end
 	else
+		if not Config.Consumables[give] then print(('%s may have potentially attempted an item exploit to gain %s %s'):format(src, amount, item)) return end -- cancel if item does not exist in config
+		
 		if QBCore.Functions.GetPlayer(src).Functions.AddItem(item, amount or 1) then
 			TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount or 1)
 		end
