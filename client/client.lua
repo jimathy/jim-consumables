@@ -24,6 +24,7 @@ RegisterNetEvent("jim-consumables:syncItems", function(consumables, emotes)
 end)
 
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
+    if not HasItem(itemName, 1) then print("^5Debug^7: ^1Error^7: ^2Item not found in inventory^7, ^2stopping^7..") end
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
     LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
 	local Player = PlayerPedId()
@@ -199,7 +200,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 else CreateThread(function() StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
 			end
             if GetResourceState("ps-buffs") == "started" then   --PS-BUFFS ONLY
-                if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..stats.time.."^7ms") end
+                if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end
                 if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6)) end
