@@ -28,10 +28,14 @@ To add an item, you only need to add a new item table in the Config.Consumables 
 	heal = 0,				-- Set amount to heal by after consuming
 	armor = 5,				-- Amount of armor to add
 	type = "food",				-- Type: "alcohol" / "drink" / "food"
+	returnItem = {				-- Item that will be given when the item is used
+		item = "plastic",		-- eg. Plastic bottles can give "plastic"
+		amount = 1,
+	},
 	stats = {
 		screen = "rampage",		-- The screen effect to be played when after consuming the item
 		effect = "heal", 		-- The status effect given by the item, "heal" / "stamina"
-		time = 10000,			-- How long the effect should last (if not added it will default to 10000)
+		time = 10000,			-- How long the effect should last (if not added it will default to 10000 which is 10 seconds)
 		amount = 2,			-- How much the value is changed by per second
 		hunger = math.random(10,20),	-- The hunger/thirst stats of the item, if not found in the items.lua
 		thirst = math.random(10,20),	-- The hunger/thirst stats of the item, if not found in the items.lua
