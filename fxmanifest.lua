@@ -1,6 +1,6 @@
 name "Jim-Consumables"
 author "Jimathy"
-version "v1.3.2"
+version "v1.4"
 description "Consumable Script By Jimathy"
 fx_version "cerulean"
 game "gta5"
