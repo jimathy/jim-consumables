@@ -15,15 +15,17 @@ But because of the export system being used, Jim-Consumables **NEEDS** to start 
 And small example snippet for this imports the item and the emote, then syncs it to players
 
 ```lua
-local foodTable = {
-	["shotfries"] = { emote = "bsfries", canRun = false, time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(55,65), }},
-}
-local emoteTable = {
-	["bsfries"] = {"mp_player_inteat@burger", "mp_player_int_eat_burger_fp", "Fries", AnimationOptions = { Prop = "prop_food_bs_chips", PropBone = 18905, PropPlacement = {0.09, -0.06, 0.05, 300.0, 150.0}, EmoteMoving = true, EmoteLoop = true, }},
-}
+	local foodTable = {
+		["shotfries"] = { emote = "bsfries", canRun = false, time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(55,65), }},
+	}
+	local emoteTable = {
+		["bsfries"] = {"mp_player_inteat@burger", "mp_player_int_eat_burger_fp", "Fries", AnimationOptions = { Prop = "prop_food_bs_chips", PropBone = 18905, PropPlacement = {0.09, -0.06, 0.05, 300.0, 150.0}, EmoteMoving = true, EmoteLoop = true, }},
+	}
 
-for k, v in pairs(emoteTable) do exports["jim-consumables"]:importEmote(k, v) end
-for k, v in pairs(foodTable) do exports["jim-consumables"]:importConsumable(k, v) end
+	if Config.Debug then print("^5Debug^7: ^2Starting ^6Emote ^2Import^7..") end
+	for k, v in pairs(emoteTable) do exports["jim-consumables"]:importEmote(k, v) end
+	if Config.Debug then print("^5Debug^7: ^2Starting ^6Item ^2Import^7..") end
+	for k, v in pairs(foodTable) do exports["jim-consumables"]:importConsumable(k, v) end
 ```
 This will grab the `shotfries` item info and add it to the `Config.Consumables` while the servers running and the same with the built-in emote system
 
