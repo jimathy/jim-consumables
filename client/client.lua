@@ -16,22 +16,31 @@ end
 local consuming = false
 local cancelled = false
 
+AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end TriggerServerEvent("jim-consumables:getSync") end)
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() TriggerServerEvent("jim-consumables:getSync") end)
+RegisterNetEvent("jim-consumables:syncItems", function(consumables, emotes)
+    if consumables then for k, v in pairs(consumables) do if not Config.Consumables[k] then Config.Consumables[k] = v print("^5Debug^7 ^2Adding Item^7: '^6"..k.."^7'") end end end
+    if emotes then for k, v in pairs(emotes) do if not Config.Emotes[k] then Config.Emotes[k] = v print("^5Debug^7 ^2Adding Emote^7: '^6"..k.."^7'") end end end
+end)
+
 RegisterNetEvent('jim-consumables:Consume', function(itemName)
+    if not HasItem(itemName, 1) then print("^5Debug^7: ^1Error^7: ^2Item not found in inventory^7, ^2stopping^7..") end
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
     LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
 	local Player = PlayerPedId()
-	local emote = Config.Emotes[Config.Consumables[itemName].emote]
+	local emote = Config.Emotes[Config.Consumables[itemName].emote] or "eat"
+    local returnItem = Config.Consumables[itemName].returnItem or nil
 	local animDict = tostring(emote[1])
 	local anim = tostring(emote[2])
 	local model, model2, bone, bone2, drugeffect, stress
 	local P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) -- Default placement coord cariable
 	if emote.AnimationOptions.Prop then
 		model = emote.AnimationOptions.Prop
-		bone = GetPedBoneIndex(PlayerPedId(), emote.AnimationOptions.PropBone)
+		bone = GetPedBoneIndex(Player, emote.AnimationOptions.PropBone)
 		P1, P2, P3, P4, P5, P6 = table.unpack(emote.AnimationOptions.PropPlacement)
         if emote.AnimationOptions.SecondProp then
             model2 = emote.AnimationOptions.SecondProp
-            bone2 = GetPedBoneIndex(PlayerPedId(), emote.AnimationOptions.SecondPropBone)
+            bone2 = GetPedBoneIndex(Player, emote.AnimationOptions.SecondPropBone)
             P7, P8, P9, P10, P11, P12 = table.unpack(emote.AnimationOptions.SecondPropPlacement)
         end
 	end
@@ -67,12 +76,12 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	end
 	else MovementType = 0 end
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Checking if player is in a vehicle^7...") end
-	local InVehicle = IsPedInAnyVehicle(PlayerPedId(), true)
+	local InVehicle = IsPedInAnyVehicle(Player, true)
 	if InVehicle == 1 then MovementType = 51 end
 	--Load and Start animation
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Playing Animation^7...") end
 	loadAnimDict(animDict)
-	TaskPlayAnim(PlayerPedId(), animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
+	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
 
     if Config.UseProgbar then
         QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName)
@@ -87,11 +96,11 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
             if IsModelValid(model) == 1 then
                 if Config.Debug then print("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7.") end
                     attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
-                    AttachEntityToEntity(attachProp, PlayerPedId(), bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
+                    AttachEntityToEntity(attachProp, Player, bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
                     if model2 then
                         if IsModelValid(model2) == 1 then
                             attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
-                            AttachEntityToEntity(attachProp2, PlayerPedId(), bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
+                            AttachEntityToEntity(attachProp2, Player, bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
                         else print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.") end
                     end
                     while consuming do Wait(50) end
@@ -117,10 +126,11 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
         Wait(10)
         time -= 10
 	end
-	StopEntityAnim(PlayerPedId(), anim, animDict, 1.0)
+	StopEntityAnim(Player, anim, animDict, 1.0)
     unloadAnimDict(animDict)
 	if not cancelled then
         toggleItem(false, itemName, 1)
+        if returnItem ~= nil then toggleItem(true, returnItem.item, returnItem.amount) end
         if QBCore.Shared.Items[itemName].thirst then TriggerServerEvent("jim-consumables:server:addThirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + QBCore.Shared.Items[itemName].thirst) end
         if QBCore.Shared.Items[itemName].hunger then TriggerServerEvent("jim-consumables:server:addHunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + QBCore.Shared.Items[itemName].hunger) end
 		if not QBCore.Shared.Items[itemName].thirst and not QBCore.Shared.Items[itemName].hunger then
@@ -139,11 +149,11 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
         end
 		if heal and heal ~= 0 then
             if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Healing player by^7: ^6"..heal) end
-            SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) + heal)
+            SetEntityHealth(Player, GetEntityHealth(Player) + heal)
         end
 		if armor and armor ~= 0 then
             if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Adding ^6"..armor.." ^2armour^7.") end
-            TriggerServerEvent('hospital:server:SetArmor', (GetPedArmour(PlayerPedId()) + armor)) SetPedArmour(PlayerPedId(), (GetPedArmour(PlayerPedId()) + armor))
+            TriggerServerEvent('hospital:server:SetArmor', (GetPedArmour(Player) + armor)) SetPedArmour(Player, (GetPedArmour(Player) + armor))
         end
 		if type == "alcohol" then
             if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Current ^4alcoholCount^7: ^6"..(alcoholCount + 1)) end
@@ -171,29 +181,33 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 				drugCount += 1
 				if drugCount >= 4 then
                     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount.."^7 - ^2 removing health") end
-					SetEntityHealth(PlayerPedId(), GetEntityHealth(PlayerPedId()) - math.random(10,15))
+					SetEntityHealth(PlayerPedId(), GetEntityHealth(Player) - math.random(10,15))
 					if drugCount >= 7 then
                         CreateThread(function() AlienEffect() end) -- If too many drugs, if not dead will make you stumble
 					end
 				end
 			end
 			if stats.effect == "heal" then
-                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:AddHealthBuff((stats.time or 10000), (stats.amount or 6))
-                else CreateThread(function() HealEffect({(stats.time or 10000), (stats.amount or 6)}) end) end
+                if GetResourceState("ps-buffs") == "started" then
+                    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Health Buff ^2for ^6"..stats.time.."^7ms") end
+                    exports["ps-buffs"]:AddHealthBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
+                else CreateThread(function() HealEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
             end
 			if stats.effect == "stamina" then
-                if GetResourceState("ps-buffs") == "started" then exports["ps-buffs"]:StaminaBuffEffect((stats.time or 10000), (stats.amount or 6))
-                else CreateThread(function() StaminaEffect({(stats.time or 10000), (stats.amount or 6)}) end) end
+                if GetResourceState("ps-buffs") == "started" then
+                    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Stamina Buff ^2for ^6"..stats.time.."^7ms") end
+                    exports["ps-buffs"]:StaminaBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6))
+                else CreateThread(function() StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
 			end
             if GetResourceState("ps-buffs") == "started" then   --PS-BUFFS ONLY
-                if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs") end
-                if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((stats.time or 10000), (stats.amount or 6)) end
-                if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((stats.time or 10000), (stats.amount or 6)) end
-                if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((stats.time or 10000), (stats.amount or 6)) end
-                if stats.effect == "hacking" then exports["ps-buffs"]:AddBuff("hacking", (stats.time or 10000)) end
-                if stats.effect == "intelligence" then exports["ps-buffs"]:AddBuff("intelligence", (stats.time or 10000)) end
-                if stats.effect == "luck" then exports["ps-buffs"]:AddBuff("luck", (stats.time or 10000)) end
-                if stats.effect == "strength" then exports["ps-buffs"]:AddBuff("strength", (stats.time or 10000)) end
+                if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end
+                if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
+                if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
+                if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6)) end
+                if stats.effect == "hacking" then exports["ps-buffs"]:AddBuff("hacking", (tonumber(stats.time) or 10000)) end
+                if stats.effect == "intelligence" then exports["ps-buffs"]:AddBuff("intelligence", (tonumber(stats.time) or 10000)) end
+                if stats.effect == "luck" then exports["ps-buffs"]:AddBuff("luck", (tonumber(stats.time) or 10000)) end
+                if stats.effect == "strength" then exports["ps-buffs"]:AddBuff("strength", (tonumber(stats.time) or 10000)) end
             end
             if stats.widepupils then TriggerEvent("evidence:client:SetStatus", "widepupils", 200) end
 		end
