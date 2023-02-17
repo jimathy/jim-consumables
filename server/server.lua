@@ -6,19 +6,6 @@ for k, v in pairs(Config.Consumables) do
 	if not Config.Emotes[v.emote] then print("^1Debug^7: ^2Emote check ^7- '^1"..k.."^7' ^2requested emote ^7'^6"..v.emote.."^7' - ^2not found in config^7.^2lua^7") end
 end
 
-RegisterNetEvent('jim-consumables:server:toggleItem', function(give, item, amount)
-	local src = source
-	if give == 0 or give == false then
-		if QBCore.Functions.GetPlayer(src).Functions.RemoveItem(item, amount or 1) then
-			TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "remove", amount or 1)
-		end
-	else
-		if QBCore.Functions.GetPlayer(src).Functions.AddItem(item, amount or 1) then
-			TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount or 1)
-		end
-	end
-end)
-
 RegisterNetEvent("jim-consumables:server:DupeWarn", function(item, newsrc)
 	local src = newsrc or source
 	local P = QBCore.Functions.GetPlayer(src)
