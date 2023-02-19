@@ -1,4 +1,4 @@
-print("^2Jim^7-^2Consumables ^7v^41^7.^43^7.^42 ^7- ^2Consumables Script by ^1Jimathy^7")
+print("^2Jim^7-^2Consumables ^7v^41^7.^45 ^7- ^2Consumables Script by ^1Jimathy^7")
 
 -- If you need support I now have a discord available, it helps me keep track of issues and give better support.
 
