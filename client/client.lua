@@ -28,13 +28,20 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
     LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
 	local Player = PlayerPedId()
-	local emote = Config.Emotes[Config.Consumables[itemName].emote] or "eat"
+	local emote = Config.Emotes[Config.Consumables[itemName].emote] or Config.Emotes["crisps"]
     local returnItem = Config.Consumables[itemName].returnItem or nil
-	local animDict = tostring(emote[1])
-	local anim = tostring(emote[2])
+	local animDict, anim = tostring(emote[1]), tostring(emote[2])
 	local model, model2, bone, bone2, drugeffect, stress
 	local P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) -- Default placement coord cariable
-	if emote.AnimationOptions.Prop then
+    local RewardItem = Config.Consumables[itemName].rewards or nil
+	local time = Config.Consumables[itemName].time or math.random(5000, 6000)
+	local type = Config.Consumables[itemName].type or ""
+	local stress = Config.Consumables[itemName].stress or 0
+	local heal = Config.Consumables[itemName].heal or 0
+	local armor = Config.Consumables[itemName].armor or 0
+    local string = "Using "
+
+    if emote.AnimationOptions.Prop then
 		model = emote.AnimationOptions.Prop
 		bone = GetPedBoneIndex(Player, emote.AnimationOptions.PropBone)
 		P1, P2, P3, P4, P5, P6 = table.unpack(emote.AnimationOptions.PropPlacement)
@@ -44,14 +51,9 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
             P7, P8, P9, P10, P11, P12 = table.unpack(emote.AnimationOptions.SecondPropPlacement)
         end
 	end
-	local time = Config.Consumables[itemName].time or math.random(5000, 6000)
-	local type = Config.Consumables[itemName].type or "food"
-	local stress = Config.Consumables[itemName].stress or 0
-	local heal = Config.Consumables[itemName].heal or 0
-	local armor = Config.Consumables[itemName].armor or 0
-	if type == "drink" or type == "alcohol" then string = "Drinking " end
-	if type == "food" then string = "Eating " end
-	if type == "drug" then string = "Using " end
+    if type == "drink" or type == "alcohol" then string = "Drinking "
+    elseif type == "food" then string = "Eating "
+    else string = "Using " end
 	if consuming then
 		cancelled = true
         if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.") end
@@ -68,12 +70,9 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Grabbing Emote Animation Options^7...") end
 	if emote.AnimationOptions then
 		if emote.AnimationOptions.EmoteLoop then MovementType = 1
-		if emote.AnimationOptions.EmoteMoving then MovementType = 51
-	end
 		elseif emote.AnimationOptions.EmoteMoving then MovementType = 51
 		elseif emote.AnimationOptions.EmoteMoving == false then	MovementType = 0
-		elseif emote.AnimationOptions.EmoteStuck then MovementType = 50
-	end
+		elseif emote.AnimationOptions.EmoteStuck then MovementType = 50	end
 	else MovementType = 0 end
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Checking if player is in a vehicle^7...") end
 	local InVehicle = IsPedInAnyVehicle(Player, true)
@@ -131,18 +130,34 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	if not cancelled then
         toggleItem(false, itemName, 1)
         if returnItem ~= nil then toggleItem(true, returnItem.item, returnItem.amount) end
-        if QBCore.Shared.Items[itemName].thirst then TriggerServerEvent("jim-consumables:server:addThirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + QBCore.Shared.Items[itemName].thirst) end
-        if QBCore.Shared.Items[itemName].hunger then TriggerServerEvent("jim-consumables:server:addHunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + QBCore.Shared.Items[itemName].hunger) end
-		if not QBCore.Shared.Items[itemName].thirst and not QBCore.Shared.Items[itemName].hunger then
-			local hunger = 0
-			local thirst = 0
-            if Config.Consumables[itemName].stats then
-                if Config.Consumables[itemName].stats.hunger then hunger = Config.Consumables[itemName].stats.hunger end
-                TriggerServerEvent("jim-consumables:server:addHunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + hunger)
-                if Config.Consumables[itemName].stats.thirst then thirst = Config.Consumables[itemName].stats.thirst end
-                TriggerServerEvent("jim-consumables:server:addThirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + thirst)
+
+        -- Reward Item calculations
+        CreateThread(function()
+            if RewardItem then
+                for i = 1, Config.Consumables[itemName].amounttogive do
+                    local rarity = math.random(1, countTable(Config.Rarity)) -- rarity calculation
+                    while true do
+                        local item = math.random(1, countTable(RewardItem)) -- random item in the list to pick
+                        if RewardItem[item].rarity >= rarity then
+                            toggleItem(true, RewardItem[item].item, math.random(1, RewardItem[item].max))
+                            if Config.Debug then print("^5Debug^7: ^2Given reward prize^7: '^6"..RewardItem[item].item.."^7'") end
+                            break
+                        end
+                        Wait(100)
+                    end
+                    Wait(1500)
+                end
             end
-		end
+        end)
+        local hunger = 0
+        local thirst = 0
+        if Config.Consumables[itemName].stats then
+            if Config.Consumables[itemName].stats.hunger then hunger = Config.Consumables[itemName].stats.hunger end
+            TriggerServerEvent("jim-consumables:server:addHunger", QBCore.Functions.GetPlayerData().metadata["hunger"] + hunger)
+            if Config.Consumables[itemName].stats.thirst then thirst = Config.Consumables[itemName].stats.thirst end
+            TriggerServerEvent("jim-consumables:server:addThirst", QBCore.Functions.GetPlayerData().metadata["thirst"] + thirst)
+        end
+        if Config.Debug then print("^5Debug^7: ^2Hunger^7: [^6"..hunger.."^7] ^2Thrist^7: [^6"..thirst.."^7]" ) end
         if stress and stress ~= 0 then
             if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Reliving ^6"..stress.." ^2stress^7.") end
             TriggerServerEvent('hud:server:RelieveStress', stress)
@@ -200,7 +215,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 else CreateThread(function() StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
 			end
             if GetResourceState("ps-buffs") == "started" then   --PS-BUFFS ONLY
-                if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end
+                --if Config.Debug then if stats.effect then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end end
                 if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6)) end
@@ -221,18 +236,8 @@ end)
 CreateThread(function()
     while true do
         Wait(10)
-        if alcoholCount > 0 then
-            Wait(1000 * 60 * 15)
-            alcoholCount -= 1
-        else
-            Wait(1000)
-        end
-        if drugCount > 0 then
-            Wait(1000 * 60 * 15)
-            drugCount -= 1
-        else
-            Wait(1000)
-        end
+        if alcoholCount > 0 then Wait(1000 * 60 * 15) alcoholCount -= 1 else Wait(1000) end
+        if drugCount > 0 then Wait(1000 * 60 * 15) drugCount -= 1 else Wait(1000) end
 	end
 end)
 
