@@ -45,28 +45,37 @@ Config = {
 		["meth"] = { 			emote = "coke",		time = math.random(5000, 6000), stress = math.random(12, 24), heal = 0, armor = 10, type = "drug", stats = { effect = "stamina", widepupils = false, canOD = true } },
 		----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+		----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-		--Example item
-		--[[ ["heartstopper"] = {
+		--[[Example item
+		["heartstopper"] = {
 			emote = "burger", 							-- Select an emote from below, it has to be in here
 			time = math.random(5000, 6000),				-- Amount of time it takes to consume the item
 			stress = math.random(1,2),					-- Amount of stress relief, can be 0
 			heal = 0, 									-- Set amount to heal by after consuming
 			armor = 5,									-- Amount of armor to add
 			type = "food",								-- Type: "alcohol" / "drink" / "food"
-			returnItem = {						-- Item that will be given when the item is used
-				item = "plastic",				-- eg. Plastic bottles can give "plastic"
-				amount = 1,
-			},
+
 			stats = {
-				screen = "rampage",						-- The screen effect to be played when after consuming the item
+				screen = "thermal",						-- The screen effect to be played when after consuming the item "rampage" "turbo" "focus" "weed" "trevor" "nightvision" "thermal"
 				effect = "heal", 						-- The status effect given by the item, "heal" / "stamina"
+														-- This supports ps-buffs effects "armor" "stress" "swimming" "hacking" "intelligence" "luck" "strength"
 				time = 10000,							-- How long the effect should last (if not added it will default to 10000)
 				amount = 6,								-- How much the value is changed by per second
-				hunger = math.random(10,20),			-- The hunger/thirst stats of the item, if not found in the items.lua
-				thirst = math.random(10,20),			-- The hunger/thirst stats of the item, if not found in the items.lua
+				hunger = math.random(10, 20),			-- The hunger/thirst stats of the item, if not found in the items.lua
+				thirst = math.random(10, 20),			-- The hunger/thirst stats of the item, if not found in the items.lua
 			},
-		}, ]]
+			--Reward Items Variables
+														-- These can be the only thing in a consumable table and the item will still work
+			amounttogive = 3,							-- Used for "RewardItems", tells the script how many to give
+			rewards = {
+				[1] = {
+					item = "plastic", 					-- prize item name
+					max = 10,							-- max amount to give (this is put into math.random(1, max) )
+					rarity = 1,							-- the rarity system, 1 being rarest, 4 being most common
+				},
+			},
+		},]]
 
 	},
 	Emotes = {
