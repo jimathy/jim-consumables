@@ -55,26 +55,37 @@ RegisterNetEvent('jim-consumables:server:addHunger', function(amount)
     TriggerClientEvent('hud:client:UpdateNeeds', source, amount, Player.PlayerData.metadata.thirst)
 end)
 
-function HasItem(source, items, amount)
-	local amount = amount or 1
-	local Player = QBCore.Functions.GetPlayer(source)
-	if not Player then return false end
-	local count = 0
-
-	if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Checking if player has required item^7 '^3"..tostring(items).."^7'") end
-
-	for _, itemData in pairs(Player.PlayerData.items) do
-		if itemData and (itemData.name == items) then
-			if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Item^7: '^3"..tostring(items).."^7' ^2Slot^7: ^3"..itemData.slot.." ^7x(^3"..tostring(itemData.amount).."^7)") end
-			count += itemData.amount
+if Config.Inv == "ox" then
+	function HasItem(src, items, amount)
+		local count = exports.ox_inventory:Search(src, 'count', items)
+		if count >= amount then
+            if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^5FOUND^7 x^3"..count.."^7 ^3"..tostring(items)) end
+            return true
+        else
+            if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end
+            return false
+        end
+	end
+else
+	function HasItem(source, items, amount)
+		local amount = amount or 1
+		local Player = QBCore.Functions.GetPlayer(source)
+		if not Player then return false end
+		local count = 0
+		if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Checking if player has required item^7 '^3"..tostring(items).."^7'") end
+		for _, itemData in pairs(Player.PlayerData.items) do
+			if itemData and (itemData.name == items) then
+				if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Item^7: '^3"..tostring(items).."^7' ^2Slot^7: ^3"..itemData.slot.." ^7x(^3"..tostring(itemData.amount).."^7)") end
+				count += itemData.amount
+			end
 		end
+		if count >= amount then
+			if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^5FOUND^7 x^3"..count.."^7") end
+			return true
+		end
+		if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end
+		return false
 	end
-	if count >= amount then
-		if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^5FOUND^7 x^3"..count.."^7") end
-		return true
-	end
-	if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end
-	return false
 end
 
 --Export Import System--
