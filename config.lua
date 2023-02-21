@@ -7,6 +7,8 @@ print("^2Jim^7-^2Consumables ^7v^41^7.^45 ^7- ^2Consumables Script by ^1Jimathy^
 Config = {
 	Debug = false,
 	
+	Inv = "qb", -- set to "ox" if using ox_ivnentory
+	
 	Notify = "qb",
 	
 	UseProgbar = false,
