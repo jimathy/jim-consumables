@@ -83,7 +83,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Playing Animation^7...") end
 	loadAnimDict(animDict)
 	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
-
+	if Config.Debug then print("^5Debug^7: ^3Consume^7: ^Player Movement Type is^7..."..json.encode(MovementType).." ") end
     if Config.UseProgbar then
         QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName)
     else
