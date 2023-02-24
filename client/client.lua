@@ -68,20 +68,22 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	end
 	--Emote Stuff
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Grabbing Emote Animation Options^7...") end
-	if emote.AnimationOptions then
-		if emote.AnimationOptions.EmoteLoop then MovementType = 1
-		elseif emote.AnimationOptions.EmoteMoving then MovementType = 51
-		elseif emote.AnimationOptions.EmoteMoving == false then	MovementType = 0
-		elseif emote.AnimationOptions.EmoteStuck then MovementType = 50	end
-	else MovementType = 0 end
+    local InVehicle = IsPedInAnyVehicle(Player, true)
+    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^Player is in a vehicle^7..."..json.encode(InVehicle).." ") end
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Checking if player is in a vehicle^7...") end
-	local InVehicle = IsPedInAnyVehicle(Player, true)
-	if InVehicle == 1 then MovementType = 51 end
+	if InVehicle == 1 then MovementType = 51 
+    elseif emote.AnimationOptions then
+		if emote.AnimationOptions.EmoteMoving then MovementType = 51
+        elseif emote.AnimationOptions.EmoteLoop then MovementType = 1
+		elseif emote.AnimationOptions.EmoteStuck then MovementType = 50
+        elseif emote.AnimationOptions.EmoteMoving == false then	MovementType = 0
+        end
+	end
 	--Load and Start animation
     if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Playing Animation^7...") end
 	loadAnimDict(animDict)
 	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
-
+	if Config.Debug then print("^5Debug^7: ^3Consume^7: ^Player Movement Type is^7..."..json.encode(MovementType).." ") end
     if Config.UseProgbar then
         QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName)
     else
