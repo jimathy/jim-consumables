@@ -142,5 +142,6 @@ Config = {
 				EmoteMoving = true, EmoteDuration = 2600 }},
 		["cig"] = {"amb@world_human_smoking@male@male_a@enter", "enter", "Cig", AnimationOptions =
 			{ Prop = 'prop_amb_ciggy_01', PropBone = 47419, PropPlacement = {0.015, -0.009, 0.003, 55.0, 0.0, 110.0},
+			EmoteMoving = true, EmoteDuration = 2600 }},
 	},
 }
