@@ -109,6 +109,9 @@ Config = {
 		["vodkab"] = {"mp_player_intdrink", "loop_bottle", "(Don't Use) Vodka Bottle", AnimationOptions =
 			{ Prop = 'prop_vodka_bottle', PropBone = 18905, PropPlacement = {0.00, -0.26, 0.10, 240.0, -60.0},
 				EmoteMoving = true, EmoteLoop = true }},
+		["ecola"] = {"mp_player_intdrink", "loop_bottle", "E-cola", AnimationOptions =
+			{ Prop = "prop_ecola_can", PropBone = 18905, PropPlacement = {0.12, 0.008, 0.03, 240.0, -60.0},
+				EmoteMoving = true, EmoteLoop = true, }},
 		--Drugs
 		["coke"] = { "switch@trevor@trev_smoking_meth", "trev_smoking_meth_loop", "Coke", AnimationOptions =
 			{ EmoteLoop = true, EmoteMoving = true, }},
