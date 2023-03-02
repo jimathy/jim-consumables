@@ -1,38 +1,51 @@
-# jim-consumables
+# Jim-Consumables
 Consumables script for QBCore
 
 # What is this?
-This script is designed as a replacement/override for food and drink consumables in qb-smallresources
+This script is designed as a replacement/override for food and drink consumables in `qb-smallresources`
 
-It's main purpose was to make it possible to not stand up while sitting due to lazy events such as ClearPedTasks in most scripts, this one is designed to cancel the animation you have chosen, not all animations. This includes progressbar.
+It's main purpose was to make it so players did not stand up while sitting with my scripts due to lazy events such as ClearPedTasks in progressbar and dpemotes, this one is designed to cancel the animation you have chosen, not all animations.
 
-## v1.4 Beta Information
-I've added a export system that allows scripts to easily add new foods and drinks to be usable and then sync them between players
-This should work but may have issues.
+It's recommended to set `Config.UseProgBar` to `false` to get this effect.
 
-But because of the export system being used, Jim-Consumables **NEEDS** to start before any scripts that use it.
+## v1.5 Update Information
+	I've added a export system that allows scripts to easily add new foods and drinks to be usable and then sync them between players
+	This should work but may have issues.
 
-And small example snippet for this imports the item and the emote, then syncs it to players
+	But because of the export system being used, Jim-Consumables **NEEDS** to start before any scripts that use it.
 
-```lua
-local foodTable = {
-	["shotfries"] = { emote = "bsfries", canRun = false, time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(55,65), }},
-}
-local emoteTable = {
-	["bsfries"] = {"mp_player_inteat@burger", "mp_player_int_eat_burger_fp", "Fries", AnimationOptions = { Prop = "prop_food_bs_chips", PropBone = 18905, PropPlacement = {0.09, -0.06, 0.05, 300.0, 150.0}, EmoteMoving = true, EmoteLoop = true, }},
-}
-
-for k, v in pairs(emoteTable) do exports["jim-consumables"]:importEmote(k, v) end
-for k, v in pairs(foodTable) do exports["jim-consumables"]:importConsumable(k, v) end
-```
-This will grab the `shotfries` item info and add it to the `Config.Consumables` while the servers running and the same with the built-in emote system
+	This will be built into my scripts that use consumables to make it more plug and play
 
 # Installation
 
-This script is recommended to be ran last/at the bottom of your server.cfg because this is intended to take control of items, if ran too early the original script may override this one.
+- I always recommend starting my scripts **AFTER** `[qb]` not inside it as it can mess with any dependancies on server load
+- I have a separate folder called `[jimextras]` (that is also in the resources folder) that starts before any scripts would use it.
+- This ensure's it has everything it requires before trying to load
+- Example of my load order:
+```CSS
+# QBCore & Extra stuff
+ensure qb-core
+ensure [qb]
+ensure [standalone]
+ensure [voice]
+ensure [defaultmaps]
+ensure [vehicles]
 
-It already takes control of default qbcore food and drink, but you would probably want to add more.
+# Extra Jim Stuff
+ensure [jimextras]
+ensure [jim]
+```
 
+## QB-SmallResources
+
+- It should already take control of default qbcore food, drink and drugs.
+- If it fails to do this and attempts to use qb-smallresources still you will need to:
+- `[qb]` > `qb-smallresources` > `server` > `consumables.lua`
+- Remove or comment out the `CreateUseableItem` events for *alcohol*, *eat*, *drink* and *drug* in this file
+- Not all of them! (such as armour related items)
+- This ***should*** stop `qb-smallresources` taking control and confusing `jim-consumables`
+
+## New Items
 To add an item, you only need to add a new item table in the Config.Consumables like this:
 ```lua
 ["heartstopper"] = {
@@ -89,3 +102,22 @@ If this script is enabled it will automatically try to use their system to apply
 ```
 
 This script supports dpemotes style emotes, so if you have some that you want to be triggered when eating or drinking drop it in the Config.Emotes section.
+
+
+## Add consumables from external scripts
+
+A small example of a server-sided snippet for this imports the item and the emote, then syncs it to players before and after they connect.
+
+```lua
+local foodTable = {
+	["shotfries"] = { emote = "bsfries", canRun = false, time = math.random(5000, 6000), stress = math.random(2, 4), heal = 0, armor = 0, type = "food", stats = { hunger = math.random(55,65), }},
+}
+
+local emoteTable = {
+	["bsfries"] = {"mp_player_inteat@burger", "mp_player_int_eat_burger_fp", "Fries", AnimationOptions = { Prop = "prop_food_bs_chips", PropBone = 18905, PropPlacement = {0.09, -0.06, 0.05, 300.0, 150.0}, EmoteMoving = true, EmoteLoop = true, }},
+}
+
+for k, v in pairs(foodTable) do TriggerEvent("jim-consumables:server:syncAddItem", k, v) end
+for k, v in pairs(emoteTable) do TriggerEvent("jim-consumables:server:syncAddEmote", k, v) end
+```
+This will grab the `shotfries` item info and add it to the `Config.Consumables` while the servers running and the same with the built-in emote system

@@ -1,5 +1,5 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-RegisterNetEvent('QBCore:Client:UpdateObject', function() QBCore = exports['qb-core']:GetCoreObject() end)
+local QBCore = exports[Config.Core]:GetCoreObject()
+RegisterNetEvent('QBCore:Client:UpdateObject', function() QBCore = exports[Config.Core]:GetCoreObject() end)
 
 local time = 1000
 function loadModel(model) if not HasModelLoaded(model) then
@@ -20,7 +20,6 @@ function unloadPtfxDict(dict) if Config.Debug then print("^5Debug^7: ^2Removing 
 function destroyProp(entity)
 	if Config.Debug then print("^5Debug^7: ^2Destroying Prop^7: '^6"..entity.."^7'") end
 	SetEntityAsMissionEntity(entity) Wait(5)
-	--DetachEntity(entity, true, true) Wait(5)
 	DeleteObject(entity)
 end
 
@@ -28,13 +27,13 @@ function makeProp(data, freeze, synced)
     loadModel(data.prop)
     local prop = CreateObject(data.prop, 0.0, 0.0, 0.0, synced or false, synced or false, false)
     SetEntityHeading(prop, data.coords.w+180.0)
-    --FreezeEntityPosition(prop, freeze or false)
     SetEntityCompletelyDisableCollision(prop, true, false)
     DisableCamCollisionForEntity(prop)
     DisableCamCollisionForObject(prop)
     if Config.Debug then print("^5Debug^7: ^6Prop ^2Created ^7: '^6"..prop.."^7'") end
     return prop
 end
+
 function triggerNotify(title, message, type, src)
 	if Config.Notify == "okok" then
 		if not src then	exports['okokNotify']:Alert(title, message, 6000, type)
@@ -64,13 +63,8 @@ function toggleItem(give, item, amount) TriggerServerEvent("jim-consumables:serv
 if Config.Inv == "ox" then
 	function HasItem(items, amount)
 		local count = exports.ox_inventory:Search('count', items)
-        if count >= amount then
-            if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^5FOUND^7 ^3"..count.."^7/^3"..amount.." "..tostring(items)) end
-            return true
-        else
-            if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2"..tostring(items).." ^1NOT FOUND^7") end
-            return false
-        end
+        if count >= amount then if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^5FOUND^7 ^3"..count.."^7/^3"..amount.." "..tostring(items)) end return true
+        else if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2"..tostring(items).." ^1NOT FOUND^7") end return false end
 	end
 else
     function HasItem(items, amount)

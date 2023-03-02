@@ -1,4 +1,7 @@
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports[Config.Core]:GetCoreObject()
+
+local Consumables = Config.Consumables
+local Emotes = Config.Emotes
 
 for k, v in pairs(Config.Consumables) do
 	QBCore.Functions.CreateUseableItem(k, function(source, item) TriggerClientEvent('jim-consumables:Consume', source, item.name) end)
@@ -41,37 +44,27 @@ RegisterNetEvent('jim-consumables:server:toggleItem', function(give, item, amoun
 	end
 end)
 
-RegisterNetEvent('jim-consumables:server:addThirst', function(amount)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    Player.Functions.SetMetaData('thirst', amount)
-    TriggerClientEvent('hud:client:UpdateNeeds', source, Player.PlayerData.metadata.hunger, amount)
-end)
-
-RegisterNetEvent('jim-consumables:server:addHunger', function(amount)
-    local Player = QBCore.Functions.GetPlayer(source)
-    if not Player then return end
-    Player.Functions.SetMetaData('hunger', amount)
-    TriggerClientEvent('hud:client:UpdateNeeds', source, amount, Player.PlayerData.metadata.thirst)
+RegisterNetEvent('jim-consumables:server:addNeed', function(amount, type)
+    local Player = QBCore.Functions.GetPlayer(source) if not Player then return end
+	if type == "thirst" then
+		Player.Functions.SetMetaData('thirst', amount)
+		TriggerClientEvent('hud:client:UpdateNeeds', source, Player.PlayerData.metadata.hunger, amount)
+	elseif type == "hunger" then
+		Player.Functions.SetMetaData('hunger', amount)
+		TriggerClientEvent('hud:client:UpdateNeeds', source, amount, Player.PlayerData.metadata.thirst)
+	end
 end)
 
 if Config.Inv == "ox" then
 	function HasItem(src, items, amount)
 		local count = exports.ox_inventory:Search(src, 'count', items)
-		if count >= amount then
-            if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^5FOUND^7 x^3"..count.."^7 ^3"..tostring(items)) end
-            return true
-        else
-            if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end
-            return false
-        end
+		if exports.ox_inventory:Search(src, 'count', items) >= (amount or 1) then if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^5FOUND^7 x^3"..count.."^7 ^3"..tostring(items)) end return true
+        else if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end return false end
 	end
 else
 	function HasItem(source, items, amount)
-		local amount = amount or 1
+		local amount, count = amount or 1, 0
 		local Player = QBCore.Functions.GetPlayer(source)
-		if not Player then return false end
-		local count = 0
 		if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Checking if player has required item^7 '^3"..tostring(items).."^7'") end
 		for _, itemData in pairs(Player.PlayerData.items) do
 			if itemData and (itemData.name == items) then
@@ -79,30 +72,43 @@ else
 				count += itemData.amount
 			end
 		end
-		if count >= amount then
-			if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^5FOUND^7 x^3"..count.."^7") end
-			return true
-		end
-		if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end
-		return false
+		if count >= amount then if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^5FOUND^7 x^3"..count.."^7") end return true end
+		if Config.Debug then print("^5Debug^7: ^3HasItem^7: ^2Items ^1NOT FOUND^7") end	return false
 	end
 end
 
 --Export Import System--
-RegisterNetEvent("jim-consumables:getSync", function() local src = source TriggerClientEvent("jim-consumables:syncItems", source, Config.Consumables, Config.Emotes) end)
-local function importEmote(emoteName, eInfo)
-	if Config.Debug then print("^5Debug^7: ^2Importing Item ^7'^6"..emoteName.."^7'") end
-	Config.Emotes[emoteName] = eInfo
-	TriggerClientEvent("jim-consumables:syncItems", -1, nil, Config.Emotes)
-end
+QBCore.Functions.CreateCallback('jim-consumables:server:syncConsumables', function(source, cb) cb(Consumables) end)
+QBCore.Functions.CreateCallback('jim-consumables:server:syncEmotes', function(source, cb) cb(Emotes) end)
 
-local function importConsumable(itemName, conInfo)
-	if Config.Debug then print("^5Debug^7: ^2Importing Item ^7'^6"..itemName.."^7'") end
-	if not QBCore.Shared.Items[itemName] then print("^1Debug^7: ^2Item check ^7- '^1"..k.."^7' ^2not found in the shared lua^7") end
-	Config.Consumables[itemName] = conInfo
-	QBCore.Functions.CreateUseableItem(itemName, function(source, item) TriggerClientEvent('jim-consumables:Consume', source, itemName) end)
-	TriggerClientEvent("jim-consumables:syncItems", -1, Config.Consumables, nil)
-end
+RegisterNetEvent('jim-consumables:server:syncAddItem', function(itemName, data)
+	if not Consumables[itemName] then
+		QBCore.Functions.CreateUseableItem(itemName, function(source, item) TriggerClientEvent('jim-consumables:Consume', source, itemName) end)
+		if Config.Debug then print("^5Debug^7: ^2Adding new ^3Item^7: '^6"..itemName.."^7'") end
+		Consumables[itemName] = data
+		TriggerClientEvent("jim-consumables:client:syncConsumables", -1, Consumables)
+	end
+end)
 
-exports("importEmote", importEmote)
-exports("importConsumable", importConsumable)
+RegisterNetEvent('jim-consumables:server:syncAddEmote', function(emoteName, data)
+	if not Emotes[emoteName] then
+		if Config.Debug then print("^5Debug^7: ^2Adding new ^3Emote^7: '^6"..emoteName.."^7'") end
+		Emotes[emoteName] = data
+		TriggerClientEvent("jim-consumables:client:syncEmotes", -1, Emotes)
+	end
+end)
+
+RegisterNetEvent("jim-consumables:server:syncConsumables", function() TriggerClientEvent('jim-consumables:client:syncConsumables', -1, Consumables) end)
+RegisterNetEvent("jim-consumables:server:syncEmotes", function() TriggerClientEvent('jim-consumables:client:syncEmotes', -1, Emotes) end)
+
+local function CheckVersion()
+	PerformHttpRequest('https://raw.githubusercontent.com/jimathy/jim-consumables/master/version.txt', function(err, newestVersion, headers)
+		local currentVersion = GetResourceMetadata(GetCurrentResourceName(), 'version')
+		if not newestVersion then print("Currently unable to run a version check.") return end
+		local advice = "^1You are currently running an outdated version^7, ^1please update^7"
+		if newestVersion:gsub("%s+", "") == currentVersion:gsub("%s+", "") then advice = '^6You are running the latest version.^7'
+		else print("^3Version Check^7: ^2Current^7: "..currentVersion.." ^2Latest^7: "..newestVersion) end
+		print(advice)
+	end)
+end
+CheckVersion()
