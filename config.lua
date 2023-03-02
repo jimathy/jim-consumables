@@ -112,6 +112,9 @@ Config = {
 		["ecola"] = {"mp_player_intdrink", "loop_bottle", "E-cola", AnimationOptions =
 			{ Prop = "prop_ecola_can", PropBone = 18905, PropPlacement = {0.12, 0.008, 0.03, 240.0, -60.0},
 				EmoteMoving = true, EmoteLoop = true, }},
+		["crisps"] = {"amb@world_human_drinking@coffee@male@idle_a", "idle_c", "Chrisps", AnimationOptions =
+			{ Prop = 'v_ret_ml_chips2', PropBone = 28422, PropPlacement = {0.01, -0.05, -0.1, 0.0, 0.0, 90.0},
+				EmoteLoop = true, EmoteMoving = true, }},		
 		--Drugs
 		["coke"] = { "switch@trevor@trev_smoking_meth", "trev_smoking_meth_loop", "Coke", AnimationOptions =
 			{ EmoteLoop = true, EmoteMoving = true, }},
