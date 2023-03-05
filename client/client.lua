@@ -71,7 +71,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
         if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.") end
         LocalPlayer.state:set("inv_busy", false, true)
         if Config.UseProgbar then
-            if Config.ProgressBar == "ox" then export.ox_lib:cancelProgress()
+            if Config.ProgressBar == "ox" then exports.ox_lib:cancelProgress()
             else TriggerEvent("progressbar:client:cancel") end
         else
             triggerNotify(nil, "Stopped "..string, "error")
@@ -133,7 +133,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 cancelled = true
                 LocalPlayer.state:set("inv_busy", false, true)
                 if Config.UseProgbar then
-                    if Config.ProgressBar == "ox" then export.ox_lib:cancelProgress()
+                    if Config.ProgressBar == "ox" then exports.ox_lib:cancelProgress()
                     else TriggerEvent("progressbar:client:cancel") end
                 else
                     triggerNotify(nil, "Cancelled "..string, "error")
