@@ -8,6 +8,8 @@ It's main purpose was to make it so players did not stand up while sitting with 
 
 It's recommended to set `Config.UseProgBar` to `false` to get this effect.
 
+# THIS DOESN'T DPEMOTES OR RPEMOTES YOU **NEED** TO PUT THE EMOTES IN THE BOTTOM OF THE CONFIG.LUA
+
 ## v1.5 Update Information
 	I've added a export system that allows scripts to easily add new foods and drinks to be usable and then sync them between players
 	This should work but may have issues.
