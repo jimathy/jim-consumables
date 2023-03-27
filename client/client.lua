@@ -153,7 +153,7 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
         CreateThread(function()
             if RewardItem then
                 for i = 1, Consumables[itemName].amounttogive do
-                    local rarity = math.random(1, countTable(Config.Rarity)) -- rarity calculation
+                    local rarity = math.random(1, 4) -- rarity calculation
                     while true do
                         local item = math.random(1, countTable(RewardItem)) -- random item in the list to pick
                         if RewardItem[item].rarity >= rarity then
