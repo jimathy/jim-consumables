@@ -97,12 +97,12 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Player Movement Type^7 - ^6"..json.encode(MovementType).." ^7") end
     if Config.UseProgbar then
         if Config.ProgressBar == "ox" then
-            CreateThread(function() if exports.ox_lib:progressBar({ duration = time, label = string..QBCore.Shared.Items[itemName].label.."..", useWhileDead = false, canCancel = false,}) then consuming = false else end end)
+            CreateThread(function() if exports.ox_lib:progressBar({ duration = time, label = string..(Config.Inv == "ox" and exports.ox_inventory:Items(itemName).label or QBCore.Shared.Items[itemName].label).."..", useWhileDead = false, canCancel = false,}) then consuming = false else end end)
         else
-            CreateThread(function() QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName) end)
+            CreateThread(function() QBCore.Functions.Progressbar('jimmy_consume_', string..(Config.Inv == "ox" and exports.ox_inventory:Items(itemName).label or QBCore.Shared.Items[itemName].label).."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName) end)
         end
     else
-        triggerNotify(nil, string..QBCore.Shared.Items[itemName].label.."..", "success")
+        triggerNotify(nil, string..(Config.Inv == "ox" and exports.ox_inventory:Items(itemName).label or QBCore.Shared.Items[itemName].label).."..", "success")
     end
 
 	consuming = true
