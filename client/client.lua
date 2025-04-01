@@ -28,7 +28,9 @@ RegisterNetEvent(getScript()..":client:syncEmotes", function(NewEmotes)
     Emotes = NewEmotes
 end)
 
-onPlayerLoaded(function() syncConsumables() end, true)
+onPlayerLoaded(function()
+    syncConsumables()
+end, true)
 
 
 RegisterNetEvent(getScript()..':Consume', function(itemName)
@@ -170,10 +172,15 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     if InVehicle == 1 then
         MovementType = 51
     elseif emote.AnimationOptions then
-        if emote.AnimationOptions.EmoteMoving then MovementType = 51
-        elseif emote.AnimationOptions.EmoteLoop then MovementType = 1
-        elseif emote.AnimationOptions.EmoteStuck then MovementType = emote.AnimationOptions.EmoteMoving and 50 or 2
-        elseif emote.AnimationOptions.EmoteMoving == false then	MovementType = 0 end
+        if emote.AnimationOptions.EmoteMoving then
+            MovementType = 51
+        elseif emote.AnimationOptions.EmoteLoop then
+            MovementType = 1
+        elseif emote.AnimationOptions.EmoteStuck then
+            MovementType = emote.AnimationOptions.EmoteMoving and 50 or 2
+        elseif emote.AnimationOptions.EmoteMoving == false then
+            MovementType = 0
+        end
 
     end
 	--Load and Start animation
@@ -208,9 +215,17 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                     else print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.") end
                 end
                 while consuming do Wait(50) end
-                if DoesEntityExist(attachProp) then destroyProp(attachProp) attachProp = nil end
-                if DoesEntityExist(attachProp2) then destroyProp(attachProp2) attachProp2 = nil end
-            else print("^5Debug^7: ^3PropSpawn^7: ^2Prop model isn't valid/found^7.") end
+                if DoesEntityExist(attachProp) then
+                    destroyProp(attachProp)
+                    attachProp = nil
+                end
+                if DoesEntityExist(attachProp2) then
+                    destroyProp(attachProp2)
+                    attachProp2 = nil
+                 end
+            else
+                print("^5Debug^7: ^3PropSpawn^7: ^2Prop model isn't valid/found^7.")
+            end
         end
     end)
 	while consuming do
@@ -226,7 +241,9 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         } or
         { "[BackSpace] Stop Consuming", }
         drawText(nil, drawTable, nil, nil)
-        if time <= 0 then consuming = false end
+        if time <= 0 then
+            consuming = false
+        end
         if (IsControlJustPressed(0, 21) and not canRun) or IsPedRagdoll(Player) or IsControlJustPressed(0, 177) then
             consuming = false
             cancelled = true
@@ -309,13 +326,27 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         end
         if stats then
             if stats.screen then -- Screen effect activation
-                if stats.screen == "turbo" then CreateThread(function() TurboEffect() end) end
-                if stats.screen == "focus" then CreateThread(function() FocusEffect() end) end
-                if stats.screen == "rampage" then CreateThread(function() RampageEffect() end) end
-                if stats.screen == "weed" then CreateThread(function() WeedEffect() end) end
-                if stats.screen == "trevor" then CreateThread(function() TrevorEffect() end) end
-                if stats.screen == "nightvision" then CreateThread(function() NightVisionEffect() end) end
-                if stats.screen == "thermal" then CreateThread(function() ThermalEffect() end) end
+                if stats.screen == "turbo" then
+                    CreateThread(function() TurboEffect() end)
+                end
+                if stats.screen == "focus" then
+                    CreateThread(function() FocusEffect() end)
+                end
+                if stats.screen == "rampage" then
+                    CreateThread(function() RampageEffect() end)
+                end
+                if stats.screen == "weed" then
+                    CreateThread(function() WeedEffect() end)
+                end
+                if stats.screen == "trevor" then
+                    CreateThread(function() TrevorEffect() end)
+                end
+                if stats.screen == "nightvision" then
+                    CreateThread(function() NightVisionEffect() end)
+                end
+                if stats.screen == "thermal" then
+                    CreateThread(function() ThermalEffect() end)
+                end
             end
 			if stats.canOD then
 				drugCount += 1
@@ -329,7 +360,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 				end
 			end
 			if stats.effect == "heal" then
-                if GetResourceState("ps-buffs"):find("start") then
+                if isStarted("ps-buffs") then
                     debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Health Buff ^2for ^6"..stats.time.."^7ms")
                     exports["ps-buffs"]:AddHealthBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
                 else
@@ -339,12 +370,12 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                 end
             end
 			if stats.effect == "stamina" then
-                if GetResourceState("ps-buffs"):find("start") then
+                if isStarted("ps-buffs") then
                     debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Stamina Buff ^2for ^6"..stats.time.."^7ms")
                     exports["ps-buffs"]:StaminaBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6))
                 else CreateThread(function() StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
 			end
-            if GetResourceState("ps-buffs"):find("start") then   --PS-BUFFS ONLY
+            if isStarted("ps-buffs") then   --PS-BUFFS ONLY
                 if stats.effect then debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end
                 if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
@@ -371,8 +402,8 @@ CreateThread(function()
 	end
 end)
 
-AddEventHandler('onResourceStop', function(r) if r ~= GetCurrentResourceName() then return end
+onResourceStop(function()
     lockInv(false)
 
     StopEffects()
-end)
+end, true)

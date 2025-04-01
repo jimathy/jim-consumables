@@ -27,7 +27,6 @@ shared_scripts {
 }
 
 client_scripts {
-    --'@warmenu/warmenu.lua',
     'client/*.lua',
 }
 
