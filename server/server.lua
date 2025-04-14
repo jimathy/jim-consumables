@@ -28,18 +28,18 @@ RegisterNetEvent('jim-consumables:server:toggleItem', function(give, item, amoun
 					QBCore.Functions.GetPlayer(src).Functions.RemoveItem(item, 1)
 					remamount -= 1
 				end
-				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "remove", amount) -- Show removal item box when all are removed
+				TriggerClientEvent('inventory:client:ItemBox', src, (Config.Inv == "ox" and exports.ox_inventory:Items(item) or QBCore.Shared.Items[item]), "remove", amount) -- Show removal item box when all are removed
 				return
 			end
 			if QBCore.Functions.GetPlayer(src).Functions.RemoveItem(item, amount) then
-				if Config.Debug then print("^5Debug^7: ^1Removing ^2from Player^7(^2"..src.."^7) '^6"..QBCore.Shared.Items[item].label.."^7(^2x^6"..(amount or "1").."^7)'") end
-				TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "remove", amount)
+				if Config.Debug then print("^5Debug^7: ^1Removing ^2from Player^7(^2"..src.."^7) '^6"..(Config.Inv == "ox" and exports.ox_inventory:Items(item).label or QBCore.Shared.Items[itemName].label).."^7(^2x^6"..(amount or "1").."^7)'") end
+				TriggerClientEvent('inventory:client:ItemBox', src, (Config.Inv == "ox" and exports.ox_inventory:Items(item) or QBCore.Shared.Items[item]), "remove", amount)
 			end
 		else TriggerEvent("jim-consumables:server:DupeWarn", item, src) end -- if not boot the player
 	elseif give then
 		if QBCore.Functions.GetPlayer(src).Functions.AddItem(item, amount) then
-			if Config.Debug then print("^5Debug^7: ^4Giving ^2Player^7(^2"..src.."^7) '^6"..QBCore.Shared.Items[item].label.."^7(^2x^6"..(amount or "1").."^7)'") end
-			TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items[item], "add", amount)
+			if Config.Debug then print("^5Debug^7: ^4Giving ^2Player^7(^2"..src.."^7) '^6"..(Config.Inv == "ox" and exports.ox_inventory:Items(item).label or QBCore.Shared.Items[itemName].label).."^7(^2x^6"..(amount or "1").."^7)'") end
+			TriggerClientEvent('inventory:client:ItemBox', src, (Config.Inv == "ox" and exports.ox_inventory:Items(item) or QBCore.Shared.Items[item]), "add", amount)
 		end
 	end
 end)
