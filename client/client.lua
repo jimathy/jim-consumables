@@ -1,58 +1,130 @@
-local QBCore = exports[Config.Core]:GetCoreObject()
-
 local alcoholCount, drugCount, consuming, cancelled = 0, 0, false, false
-local Consumables, Emotes = {}, {}
+Consumables, Emotes = {}, {}
 
-local function propConvert() --Convert Prop Model Names to Model HashKeys now to be more optimized when loading later
-    for k in pairs(Emotes) do
-        if Emotes[k].AnimationOptions.Prop then
-            Emotes[k].AnimationOptions.Prop = GetHashKey(Emotes[k].AnimationOptions.Prop)
-            if Emotes[k].AnimationOptions.SecondProp then
-                Emotes[k].AnimationOptions.SecondProp = GetHashKey(Emotes[k].AnimationOptions.SecondProp)
+local function syncConsumables()
+    Consumables = triggerCallback(getScript()..":server:syncConsumables")
+    Emotes = triggerCallback(getScript()..":server:syncEmotes")
+    debugPrint("^5Debug^7: ^2Retrieved ^6"..countTable(Consumables).." ^2Items and ^6"..countTable(Emotes).." ^2Emotes^7")
+end
+
+RegisterNetEvent(getScript()..":client:syncConsumables", function(NewConsumables)
+    if debugMode then
+        for k, v in pairs(NewConsumables) do
+            if not Consumables[k] then
+                print("^5Debug^7: ^2New Item Info added^7: ^6"..k.."^7")
             end
         end
     end
-end
-
-local function syncConsumables()
-	local p = promise.new() QBCore.Functions.TriggerCallback('jim-consumables:server:syncConsumables', function(cb) p:resolve(cb) end) Consumables = Citizen.Await(p)
-	local p2 = promise.new() QBCore.Functions.TriggerCallback('jim-consumables:server:syncEmotes', function(cb) p2:resolve(cb) end) Emotes = Citizen.Await(p2)
-    if Config.Debug then print("^5Debug^7: ^2Retrieved ^6"..countTable(Consumables).." ^2Items and ^6"..countTable(Emotes).." ^2Emotes^7") end
-    propConvert()
-end
-
-RegisterNetEvent("jim-consumables:client:syncConsumables", function(NewConsumables)
-    if Config.Debug then for k, v in pairs(NewConsumables) do if not Consumables[k] then print("^5Debug^7: ^2New Item Info added^7: ^6"..k.."^7") end end end
     Consumables = NewConsumables
 end)
-RegisterNetEvent("jim-consumables:client:syncEmotes", function(NewEmotes)
-    if Config.Debug then for k, v in pairs(NewEmotes) do if not Emotes[k] then print("^5Debug^7: ^2New Emote Info added^7: ^6"..k.."^7") end end end
+RegisterNetEvent(getScript()..":client:syncEmotes", function(NewEmotes)
+    if debugMode then
+        for k, v in pairs(NewEmotes) do
+            if not Emotes[k] then
+                print("^5Debug^7: ^2New Emote Info added^7: ^6"..k.."^7")
+            end
+        end
+    end
     Emotes = NewEmotes
-    propConvert()
 end)
 
-AddEventHandler('onResourceStart', function(r) if GetCurrentResourceName() ~= r then return end syncConsumables() end)
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function() syncConsumables() end)
+onPlayerLoaded(function()
+    syncConsumables()
+end, true)
 
-RegisterNetEvent('jim-consumables:Consume', function(itemName)
-    if not HasItem(itemName, 1) then print("^5Debug^7: ^1Error^7: ^2Item not found in inventory^7, ^2stopping^7..") end
-    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..") end
-    LocalPlayer.state:set("inv_busy", true, true) TriggerEvent('inventory:client:busy:status', true) TriggerEvent('canUseInventoryAndHotbar:toggle', false)
-	local Player = PlayerPedId()
+
+RegisterNetEvent(getScript()..':Consume', function(itemName)
+    if not hasItem(itemName, 1) then
+        print("^5Debug^7: ^1Error^7: ^2Item not found in inventory^7, ^2stopping^7..")
+    end
+    local requiredItem = Consumables[itemName].requiredItem or nil
+
+    if requiredItem then
+        if not hasItem(requiredItem, 1) then
+            triggerNotify(nil, "You need a "..Items[requiredItem].label, "error")
+            return
+        else
+        --    if requiredItem == "lighter" then breakTool({ item = "lighter", damage = math.random(0, 1) }) end
+        end
+    end
+
+    debugPrint("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..")
+    tempLockInv(true)
+    local Player = PlayerPedId()
 	local emote = Emotes[Consumables[itemName].emote] or Emotes["crisps"]
+    if isAnimal then        --- Animal ped adjustments
+        local presets = {
+            ["default"] = {
+                propPlacement = { 0.0, 0.25, -0.04, 0.0, 0.0, 0.0, },
+                propPlacement2 = { 0.0, 0.25, -0.02, 0.0, 0.0, 0.0, }
+            },
+            [`a_c_rabbit_01`] = {
+                propPlacement = { 0.0, 0.37, -0.15, 0.0, 0.0, 0.0, },
+                propPlacement2 = { 0.0, 0.37, -0.13, 0.0, 0.0, 0.0, }
+            },
+            [`a_c_rat`] = {
+                propPlacement = { 0.0, 0.25, -0.04, 0.0, 0.0, 0.0, },
+                propPlacement2 = { 0.0, 0.25, -0.02, 0.0, 0.0, 0.0, }
+            },
+            [`a_c_crow`] = {
+                propPlacement = { 0.0, 0.25, 0.02, 0.0, 0.0, 0.0, },
+                propPlacement2 = { 0.0, 0.25, 0.04, 0.0, 0.0, 0.0, }
+            },
+        }
+
+        local model = GetEntityModel(Player)
+        local isCat = (isCat() or model == `ft-raccoon`) and (model ~= `ft-sphynx`)
+        local isDog, bigDog = isDog()
+        if isDog and model == `a_c_coyote` then isDog = false end
+        local isCoyote = (model == `ft-sphynx` or model == `a_c_coyote`)
+        if model == `ft-capmonkey2` then isDog = true end
+
+        local propPlacement, propPlacement2 = { 0.0, 0.37, -0.19, 0.0, 0.0, 0.0, }, { 0.0, 0.37, -0.17, 0.0, 0.0, 0.0, }
+        if isDog then
+            if bigDog or isCoyote then
+                propPlacement = { 0.0, 0.53, -0.39, 0.0, 0.0, 0.0, } propPlacement2 = { 0.0, 0.53, -0.37, 0.0, 0.0, 0.0, }
+            else
+                propPlacement = { 0.0, 0.33, -0.28, 0.0, 0.0, 0.0, } propPlacement2 = { 0.0, 0.33, -0.26, 0.0, 0.0, 0.0, }
+            end
+        end
+        if not isCat and not isDog then
+            propPlacement = presets[model] and presets[model].propPlacement or presets["default"].propPlacement
+            propPlacement2 = presets[model] and presets[model].propPlacement2 or  presets["default"].propPlacement
+        end
+
+        emote = {
+            "creatures@pug@move", "nill", "",
+            AnimationOptions = {
+                EmoteLoop = true,
+                Prop = "v_res_tt_bowl",
+                PropBone = 64081,
+                PropPlacement = propPlacement,
+                SecondProp = Emotes[Consumables[itemName].emote].AnimationOptions.Prop or nil,
+                SecondPropBone = Emotes[Consumables[itemName].emote].AnimationOptions.Prop and 64081 or nil,
+                SecondPropPlacement = Emotes[Consumables[itemName].emote].AnimationOptions.Prop and propPlacement2 or nil,
+            },
+        }
+    end
+
     local returnItem = Consumables[itemName].returnItem or nil
 	local animDict, anim = tostring(emote[1]), tostring(emote[2])
 	local model, model2, bone, bone2, drugeffect, stress
 	local P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) -- Default placement coord cariable
     local RewardItem = Consumables[itemName].rewards or nil
-	local time = Consumables[itemName].time or math.random(5000, 6000)
 	local type = Consumables[itemName].type or ""
-	local stress = Consumables[itemName].stress or 0
-	local heal = Consumables[itemName].heal or 0
-	local armor = Consumables[itemName].armor or 0
-    local stats = Consumables[itemName].stats or nil
+    local pack = Consumables[itemName].pack or nil
     local string = "Using "
+    local notifType = ""
     local canRun = Consumables[itemName].canRun
+
+    local time, stress, heal, armor, stats = GenerateRandomValues({
+        time = Consumables[itemName].time or { 5000, 6000 },
+        stress = Consumables[itemName].stress or 0,
+        heal = Consumables[itemName].heal or 0,
+        armor = Consumables[itemName].armor or 0,
+        hunger = Consumables[itemName].stats and Consumables[itemName].stats.hunger or 0,
+        thirst = Consumables[itemName].stats and Consumables[itemName].stats.thirst or 0,
+    })
     if emote.AnimationOptions.Prop then
 		model = emote.AnimationOptions.Prop
 		bone = GetPedBoneIndex(Player, emote.AnimationOptions.PropBone)
@@ -63,16 +135,27 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
             P7, P8, P9, P10, P11, P12 = table.unpack(emote.AnimationOptions.SecondPropPlacement)
         end
 	end
-    if type == "drink" or type == "alcohol" then string = "Drinking "
-    elseif type == "food" then string = "Eating "
-    else string = "Using " end
+    if type == "drink" or type == "alcohol" then
+        string = "Drinking "
+        notifType = "drinking"
+    elseif type == "food" then
+        string = "Eating "
+        notifType = "eating"
+    elseif type == "smoke" then
+        string = "Smoking "
+        notifType = "smoking"
+    elseif type == "pack" then
+        string = "Opening "
+        notifType = "package"
+    else string = "Using "
+        notifType = "using"
+    end
 	if consuming then
 		cancelled = true
-        if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.") end
-        LocalPlayer.state:set("inv_busy", false, true)
+        debugPrint("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.")
+        tempLockInv(false)
         if Config.UseProgbar then
-            if Config.ProgressBar == "ox" then exports.ox_lib:cancelProgress()
-            else TriggerEvent("progressbar:client:cancel") end
+            stopPropgressBar()
         else
             triggerNotify(nil, "Stopped "..string, "error")
         end
@@ -80,29 +163,41 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 		return
 	end
 	--Emote Stuff
-    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Grabbing Emote Animation Options^7...") end
+    debugPrint("^5Debug^7: ^3Consume^7: ^2Grabbing Emote Animation Options^7...")
     local InVehicle = IsPedInAnyVehicle(Player, true)
-    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Checking if player is in a vehicle^7 - ^6"..tostring(InVehicle).."^7") end
-	if InVehicle == 1 then MovementType = 51
+    debugPrint("^5Debug^7: ^3Consume^7: ^2Checking if player is in a vehicle^7 - ^6"..tostring(InVehicle).."^7")
+
+    MovementType = 0 -- Default movement type
+
+    if InVehicle == 1 then
+        MovementType = 51
     elseif emote.AnimationOptions then
-		if emote.AnimationOptions.EmoteMoving then MovementType = 51
-        elseif emote.AnimationOptions.EmoteLoop then MovementType = 1
-		elseif emote.AnimationOptions.EmoteStuck then MovementType = 50
-        elseif emote.AnimationOptions.EmoteMoving == false then	MovementType = 0 end
-	end
-	--Load and Start animation
-    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Playing Animation^7...") end
-	loadAnimDict(animDict)
-	TaskPlayAnim(Player, animDict, anim, 1.0, 1.0, -1, MovementType, 0, 0, 0, 0)
-	if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Player Movement Type^7 - ^6"..json.encode(MovementType).." ^7") end
-    if Config.UseProgbar then
-        if Config.ProgressBar == "ox" then
-            CreateThread(function() if exports.ox_lib:progressBar({ duration = time, label = string..QBCore.Shared.Items[itemName].label.."..", useWhileDead = false, canCancel = false,}) then consuming = false else end end)
-        else
-            CreateThread(function() QBCore.Functions.Progressbar('jimmy_consume_', string..QBCore.Shared.Items[itemName].label.."..", time, false, false, {disableMovement = false, disableCarMovement = false, disableMouse = false, disableCombat = true,}, {}, {}, {}, function() consuming = false end, function() end, itemName) end)
+        if emote.AnimationOptions.EmoteMoving then
+            MovementType = 51
+        elseif emote.AnimationOptions.EmoteLoop then
+            MovementType = 1
+        elseif emote.AnimationOptions.EmoteStuck then
+            MovementType = emote.AnimationOptions.EmoteMoving and 50 or 2
+        elseif emote.AnimationOptions.EmoteMoving == false then
+            MovementType = 0
         end
+
+    end
+	--Load and Start animation
+    debugPrint("^5Debug^7: ^3Consume^7: ^2Playing Animation^7...")
+	if not (GetPedType(Player) == 28)then
+        playAnim(animDict, anim, -1, MovementType)
+    end
+    debugPrint("^5Debug^7: ^3Consume^7: ^2Player Movement Flag^7 - ^6"..json.encode(MovementType).." ^7")
+    if Config.Main.UseProgbar then
+        CreateThread(function()
+            if progressBar({ time = time, label = string..Items[itemName].label.."..", dead = false, cancel = false}) then
+                consuming = false
+            else
+            end
+        end)
     else
-        triggerNotify(nil, string..QBCore.Shared.Items[itemName].label.."..", "success")
+        triggerNotify(nil, string..Items[itemName].label.."..",  notifType)
     end
 
 	consuming = true
@@ -110,44 +205,68 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
         --Prop Spawning
         if model then
             if IsModelValid(model) == 1 then
-                if Config.Debug then print("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7.") end
-                    attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
-                    AttachEntityToEntity(attachProp, Player, bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
-                    if model2 then
-                        if IsModelValid(model2) == 1 then
-                            attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
-                            AttachEntityToEntity(attachProp2, Player, bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
-                        else print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.") end
-                    end
-                    while consuming do Wait(50) end
-                    if DoesEntityExist(attachProp) then destroyProp(attachProp) attachProp = nil end
-                    if DoesEntityExist(attachProp2) then destroyProp(attachProp2) attachProp2 = nil end
-            else print("^5Debug^7: ^3PropSpawn^7: ^2Prop model isn't valid/found^7.") end
-        end
-        end)
-	while consuming do
-		if time <= 0 then consuming = false end
-        if not canRun then
-            if IsControlJustPressed(0, 21) then
-                consuming = false
-                cancelled = true
-                LocalPlayer.state:set("inv_busy", false, true)
-                if Config.UseProgbar then
-                    if Config.ProgressBar == "ox" then exports.ox_lib:cancelProgress()
-                    else TriggerEvent("progressbar:client:cancel") end
-                else
-                    triggerNotify(nil, "Cancelled "..string, "error")
+                debugPrint("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7...")
+                attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                AttachEntityToEntity(attachProp, Player, bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
+                if model2 then
+                    if IsModelValid(model2) == 1 then
+                        attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                        AttachEntityToEntity(attachProp2, Player, bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
+                    else print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.") end
                 end
+                while consuming do Wait(50) end
+                if DoesEntityExist(attachProp) then
+                    destroyProp(attachProp)
+                    attachProp = nil
+                end
+                if DoesEntityExist(attachProp2) then
+                    destroyProp(attachProp2)
+                    attachProp2 = nil
+                 end
+            else
+                print("^5Debug^7: ^3PropSpawn^7: ^2Prop model isn't valid/found^7.")
             end
         end
-        Wait(9)
-        time -= 11
+    end)
+	while consuming do
+        local drawTable = debugMode and
+        {   "[BackSpace] Stop Consuming",
+            "Time: "..tostring(time),
+            "Type: "..(type or ""),
+            "Hunger: "..(stats.hunger or 0).."%",
+            "Thirst: "..(stats.thirst or 0).."%",
+            "Stress: "..(stress or 0).."%",
+            "Heal: "..(heal or 0).."%",
+            "Armour: "..(armor or 0).."%",
+        } or
+        { "[BackSpace] Stop Consuming", }
+        drawText(nil, drawTable, nil, nil)
+        if time <= 0 then
+            consuming = false
+        end
+        if (IsControlJustPressed(0, 21) and not canRun) or IsPedRagdoll(Player) or IsControlJustPressed(0, 177) then
+            consuming = false
+            cancelled = true
+            tempLockInv(false)
+            hideText()
+            if Config.Main.UseProgbar then
+                stopPropgressBar()
+            else
+                triggerNotify(nil, "Cancelled "..string, "error")
+            end
+        end
+        Wait(0)
+        time -= 12
 	end
 	StopEntityAnim(Player, anim, animDict, 1.0)
     unloadAnimDict(animDict)
 	if not cancelled then
-        toggleItem(false, itemName, 1)
-        if returnItem ~= nil then toggleItem(true, returnItem.item, returnItem.amount) end
+        hideText()
+        removeItem(itemName, 1)
+        if returnItem ~= nil then
+            currentToken = triggerCallback(AuthEvent)
+            addItem(returnItem.item, returnItem.amount)
+        end
 
         -- Reward Item calculations
         CreateThread(function()
@@ -157,8 +276,9 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                     while true do
                         local item = math.random(1, countTable(RewardItem)) -- random item in the list to pick
                         if RewardItem[item].rarity >= rarity then
-                            toggleItem(true, RewardItem[item].item, math.random(1, RewardItem[item].max))
-                            if Config.Debug then print("^5Debug^7: ^2Given reward prize^7: '^6"..RewardItem[item].item.."^7'") end
+                            currentToken = triggerCallback(AuthEvent)
+                            addItem(RewardItem[item].item, math.random(1, RewardItem[item].max or 1))
+                            debugPrint("^5Debug^7: ^2Given reward prize^7: '^6"..RewardItem[item].item.."^7'")
                             break
                         end
                         Wait(100)
@@ -168,25 +288,31 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
             end
         end)
         if stats then
-            if stats.hunger then TriggerServerEvent("jim-consumables:server:addNeed", QBCore.Functions.GetPlayerData().metadata["hunger"] + stats.hunger, "hunger") end
-            if stats.thirst then TriggerServerEvent("jim-consumables:server:addNeed", QBCore.Functions.GetPlayerData().metadata["thirst"] + stats.thirst, "thirst") end
+            if stats.hunger then
+                --stats.hunger = math.random(stats.hunger - 5, stats.hunger + 5)
+                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["hunger"] + stats.hunger, "hunger")
+            end
+            if stats.thirst then
+                --stats.thirst = math.random(stats.thirst - 5, stats.thirst + 5)
+                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["thirst"] + stats.thirst, "thirst")
+            end
         end
-        if Config.Debug then print("^5Debug^7: ^2Hunger^7: [^6"..(stats.hunger or 0).."^7] ^2Thrist^7: [^6"..(stats.thirst or 0).."^7]" ) end
+        debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(stats.hunger or 0).."^7] ^2Thrist^7: [^6"..(stats.thirst or 0).."^7]" )
         if stress and stress ~= 0 then
-            if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Reliving ^6"..stress.." ^2stress^7.") end
+            debugPrint("^5Debug^7: ^3Consume^7: ^2Relieving ^6"..stress.." ^2stress^7.")
             TriggerServerEvent('hud:server:RelieveStress', stress)
         end
 		if heal and heal ~= 0 then
-            if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Healing player by^7: ^6"..heal) end
+            debugPrint("^5Debug^7: ^3Consume^7: ^2Healing player by^7: ^6"..heal)
             SetEntityHealth(Player, GetEntityHealth(Player) + heal)
         end
 		if armor and armor ~= 0 then
-            if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Adding ^6"..armor.." ^2armour^7.") end
+            debugPrint("^5Debug^7: ^3Consume^7: ^2Adding ^6"..armor.." ^2armour^7.")
             TriggerServerEvent('hospital:server:SetArmor', (GetPedArmour(Player) + armor)) SetPedArmour(Player, (GetPedArmour(Player) + armor))
         end
 		if type == "alcohol" then
-            if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Current ^4alcoholCount^7: ^6"..(alcoholCount + 1)) end
-			alcoholCount = alcoholCount + 1
+			alcoholCount += 1
+            debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4alcoholCount^7: ^6"..alcoholCount)
 			if alcoholCount > 1 and alcoholCount < 4 then
 				TriggerEvent("evidence:client:SetStatus", "alcohol", 200)
 			elseif alcoholCount >= 4 then
@@ -194,41 +320,63 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
                 CreateThread(function() AlienEffect() end) -- Used as overdosing/too drunk effect
             end
         end
+        if pack then
+            currentToken = triggerCallback(AuthEvent)
+            addItem(pack.item, pack.amount)
+        end
         if stats then
             if stats.screen then -- Screen effect activation
-                if stats.screen == "turbo" then CreateThread(function() TurboEffect() end) end
-                if stats.screen == "focus" then CreateThread(function() FocusEffect() end) end
-                if stats.screen == "rampage" then CreateThread(function() RampageEffect() end) end
-                if stats.screen == "weed" then CreateThread(function() WeedEffect() end) end
-                if stats.screen == "trevor" then CreateThread(function() TrevorEffect() end) end
-                if stats.screen == "nightvision" then CreateThread(function() NightVisionEffect() end) end
-                if stats.screen == "thermal" then CreateThread(function() ThermalEffect() end) end
+                if stats.screen == "turbo" then
+                    CreateThread(function() TurboEffect() end)
+                end
+                if stats.screen == "focus" then
+                    CreateThread(function() FocusEffect() end)
+                end
+                if stats.screen == "rampage" then
+                    CreateThread(function() RampageEffect() end)
+                end
+                if stats.screen == "weed" then
+                    CreateThread(function() WeedEffect() end)
+                end
+                if stats.screen == "trevor" then
+                    CreateThread(function() TrevorEffect() end)
+                end
+                if stats.screen == "nightvision" then
+                    CreateThread(function() NightVisionEffect() end)
+                end
+                if stats.screen == "thermal" then
+                    CreateThread(function() ThermalEffect() end)
+                end
             end
 			if stats.canOD then
-                if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..(drugCount + 1)) end
 				drugCount += 1
+                debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount)
 				if drugCount >= 4 then
-                    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount.."^7 - ^2 removing health") end
-					SetEntityHealth(PlayerPedId(), GetEntityHealth(Player) - math.random(10,15))
+                    debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount.."^7 - ^2 removing health")
+					SetEntityHealth(PlayerPedId(), GetEntityHealth(Player) - math.random(10, 15))
 					if drugCount >= 7 then
                         CreateThread(function() AlienEffect() end) -- If too many drugs, if not dead will make you stumble
 					end
 				end
 			end
 			if stats.effect == "heal" then
-                if GetResourceState("ps-buffs") == "started" then
-                    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Health Buff ^2for ^6"..stats.time.."^7ms") end
+                if isStarted("ps-buffs") then
+                    debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Health Buff ^2for ^6"..stats.time.."^7ms")
                     exports["ps-buffs"]:AddHealthBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
-                else CreateThread(function() HealEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
+                else
+                    CreateThread(function()
+                        HealEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)})
+                    end)
+                end
             end
 			if stats.effect == "stamina" then
-                if GetResourceState("ps-buffs") == "started" then
-                    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Stamina Buff ^2for ^6"..stats.time.."^7ms") end
+                if isStarted("ps-buffs") then
+                    debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Stamina Buff ^2for ^6"..stats.time.."^7ms")
                     exports["ps-buffs"]:StaminaBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6))
                 else CreateThread(function() StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
 			end
-            if GetResourceState("ps-buffs") == "started" then   --PS-BUFFS ONLY
-                --if Config.Debug then if stats.effect then print("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end end
+            if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                if stats.effect then debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end
                 if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
                 if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6)) end
@@ -242,8 +390,8 @@ RegisterNetEvent('jim-consumables:Consume', function(itemName)
 	end
 	cancelled = false
 	consuming = false
-    if Config.Debug then print("^5Debug^7: ^3Consume^7: ^2Finished, unlocking inventory^7...") end
-    LocalPlayer.state:set("inv_busy", false, true) TriggerEvent('inventory:client:busy:status', false) TriggerEvent('canUseInventoryAndHotbar:toggle', true)
+    debugPrint("^5Debug^7: ^3Consume^7: ^2Finished, unlocking inventory^7...")
+    tempLockInv(false)
 end)
 
 CreateThread(function()
@@ -254,6 +402,8 @@ CreateThread(function()
 	end
 end)
 
-AddEventHandler('onResourceStop', function(r) if r ~= GetCurrentResourceName() then return end
+onResourceStop(function()
+    lockInv(false)
+
     StopEffects()
-end)
+end, true)
