@@ -135,21 +135,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             P7, P8, P9, P10, P11, P12 = table.unpack(emote.AnimationOptions.SecondPropPlacement)
         end
 	end
-    if type == "drink" or type == "alcohol" then
-        string = "Drinking "
-        notifType = "drinking"
-    elseif type == "food" then
-        string = "Eating "
-        notifType = "eating"
-    elseif type == "smoke" then
-        string = "Smoking "
-        notifType = "smoking"
-    elseif type == "pack" then
-        string = "Opening "
-        notifType = "package"
-    else string = "Using "
-        notifType = "using"
-    end
+
 	if consuming then
 		cancelled = true
         debugPrint("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.")
@@ -197,7 +183,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             end
         end)
     else
-        triggerNotify(nil, string..Items[itemName].label.."..",  notifType)
+        triggerNotify(nil, string..Items[itemName].label.."..", "success")
     end
 
 	consuming = true
