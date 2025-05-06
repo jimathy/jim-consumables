@@ -1,6 +1,6 @@
 Config = {
 	System = {
-		Debug = true,
+		Debug = false,
 		EventDebug = false,
 
 		Menu = "qb",				-- "qb", "ox"
