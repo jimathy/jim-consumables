@@ -14,15 +14,7 @@ shared_scripts {
     'shared/consumables.lua',
     'shared/shared.lua',
 
-    -- Required core scripts
-    '@ox_lib/init.lua',
-    '@ox_core/lib/init.lua',
-
-    '@es_extended/imports.lua',
-
-    '@qbx_core/modules/playerdata.lua',
-
-    --Jim Bridge
+    --Jim Bridge - https://github.com/jimathy/jim-bridge
     '@jim_bridge/starter.lua',
 }
 
