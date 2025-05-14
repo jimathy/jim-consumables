@@ -32,7 +32,6 @@ onPlayerLoaded(function()
     syncConsumables()
 end, true)
 
-
 RegisterNetEvent(getScript()..':Consume', function(itemName)
     if not hasItem(itemName, 1) then
         print("^5Debug^7: ^1Error^7: ^2Item not found in inventory^7, ^2stopping^7..")
@@ -114,10 +113,10 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 	local type = Consumables[itemName].type or ""
     local pack = Consumables[itemName].pack or nil
     local string = "Using "
-    local notifType = ""
     local canRun = Consumables[itemName].canRun
+    local stats = Consumables[itemName].stats
 
-    local time, stress, heal, armor, stats = GenerateRandomValues({
+    local time, stress, heal, armor, needStats = GenerateRandomValues({
         time = Consumables[itemName].time or { 5000, 6000 },
         stress = Consumables[itemName].stress or 0,
         heal = Consumables[itemName].heal or 0,
@@ -187,6 +186,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     end
 
 	consuming = true
+
     CreateThread(function()
         --Prop Spawning
         if model then
@@ -198,7 +198,9 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                     if IsModelValid(model2) == 1 then
                         attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
                         AttachEntityToEntity(attachProp2, Player, bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
-                    else print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.") end
+                    else
+                        print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.")
+                    end
                 end
                 while consuming do Wait(50) end
                 if DoesEntityExist(attachProp) then
@@ -214,13 +216,14 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             end
         end
     end)
+
 	while consuming do
         local drawTable = debugMode and
         {   "[BackSpace] Stop Consuming",
             "Time: "..tostring(time),
             "Type: "..(type or ""),
-            "Hunger: "..(stats.hunger or 0).."%",
-            "Thirst: "..(stats.thirst or 0).."%",
+            "Hunger: "..(needStats.hunger or 0).."%",
+            "Thirst: "..(needStats.thirst or 0).."%",
             "Stress: "..(stress or 0).."%",
             "Heal: "..(heal or 0).."%",
             "Armour: "..(armor or 0).."%",
@@ -250,6 +253,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         hideText()
         removeItem(itemName, 1)
         if returnItem ~= nil then
+            debugPrint("returnItem detected")
             currentToken = triggerCallback(AuthEvent)
             addItem(returnItem.item, returnItem.amount)
         end
@@ -257,6 +261,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         -- Reward Item calculations
         CreateThread(function()
             if RewardItem then
+                debugPrint("Reward Item detected")
                 for i = 1, Consumables[itemName].amounttogive do
                     local rarity = math.random(1, 4) -- rarity calculation
                     while true do
@@ -273,17 +278,15 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                 end
             end
         end)
-        if stats then
-            if stats.hunger then
-                --stats.hunger = math.random(stats.hunger - 5, stats.hunger + 5)
-                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["hunger"] + stats.hunger, "hunger")
+        if needStats then
+            if needStats.hunger then
+                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["hunger"] + needStats.hunger, "hunger")
             end
-            if stats.thirst then
-                --stats.thirst = math.random(stats.thirst - 5, stats.thirst + 5)
-                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["thirst"] + stats.thirst, "thirst")
+            if needStats.thirst then
+                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["thirst"] + needStats.thirst, "thirst")
             end
         end
-        debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(stats.hunger or 0).."^7] ^2Thrist^7: [^6"..(stats.thirst or 0).."^7]" )
+        debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(needStats.hunger or 0).."^7] ^2Thrist^7: [^6"..(needStats.thirst or 0).."^7]" )
         if stress and stress ~= 0 then
             debugPrint("^5Debug^7: ^3Consume^7: ^2Relieving ^6"..stress.." ^2stress^7.")
             TriggerServerEvent('hud:server:RelieveStress', stress)
@@ -303,7 +306,9 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 				TriggerEvent("evidence:client:SetStatus", "alcohol", 200)
 			elseif alcoholCount >= 4 then
 				TriggerEvent("evidence:client:SetStatus", "heavyalcohol", 200)
-                CreateThread(function() AlienEffect() end) -- Used as overdosing/too drunk effect
+                CreateThread(function()
+                    AlienEffect()
+                end) -- Used as overdosing/too drunk effect
             end
         end
         if pack then
@@ -312,26 +317,20 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         end
         if stats then
             if stats.screen then -- Screen effect activation
-                if stats.screen == "turbo" then
-                    CreateThread(function() TurboEffect() end)
-                end
-                if stats.screen == "focus" then
-                    CreateThread(function() FocusEffect() end)
-                end
-                if stats.screen == "rampage" then
-                    CreateThread(function() RampageEffect() end)
-                end
-                if stats.screen == "weed" then
-                    CreateThread(function() WeedEffect() end)
-                end
-                if stats.screen == "trevor" then
-                    CreateThread(function() TrevorEffect() end)
-                end
-                if stats.screen == "nightvision" then
-                    CreateThread(function() NightVisionEffect() end)
-                end
-                if stats.screen == "thermal" then
-                    CreateThread(function() ThermalEffect() end)
+                debugPrint(stats.screen)
+                local statFunctions = {
+                    ["turbo"] = TurboEffect,
+                    ["focus"] = FocusEffect,
+                    ["rampage"] = RampageEffect,
+                    ["weed"] = WeedEffect,
+                    ["trevor"] = TrevorEffect,
+                    ["nightvision"] = NightVisionEffect,
+                    ["thermal"] = ThermalEffect,
+                }
+                if statFunctions[stats.screen] then
+                    CreateThread(function()
+                        statFunctions[stats.screen]()
+                    end)
                 end
             end
 			if stats.canOD then
@@ -345,33 +344,72 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 					end
 				end
 			end
-			if stats.effect == "heal" then
-                if isStarted("ps-buffs") then
-                    debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Health Buff ^2for ^6"..stats.time.."^7ms")
-                    exports["ps-buffs"]:AddHealthBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
-                else
-                    CreateThread(function()
-                        HealEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)})
-                    end)
+            if stats.effect then
+                local effectTable = {
+                    ["heal"] = function(stats)
+                        if isStarted("ps-buffs") then
+                            debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Health Buff ^2for ^6"..stats.time.."^7ms")
+                            exports["ps-buffs"]:AddHealthBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
+                        else
+                            CreateThread(function()
+                                HealEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)})
+                            end)
+                        end
+                    end,
+                    ["stamina"] = function(stats)
+                        if isStarted("ps-buffs") then
+                            debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Stamina Buff ^2for ^6"..stats.time.."^7ms")
+                            exports["ps-buffs"]:StaminaBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6))
+                        else
+                            CreateThread(function()
+                                StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)})
+                            end)
+                        end
+                    end,
+                    ["armor"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
+                        end
+                    end,
+                    ["stress"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6))
+                        end
+                    end,
+                    ["swimming"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:SwimmingBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6))
+                        end
+                    end,
+                    ["hacking"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:AddBuff("hacking", (tonumber(stats.time) or 10000))
+                        end
+                    end,
+                    ["intelligence"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:AddBuff("intelligence", (tonumber(stats.time) or 10000))
+                        end
+                    end,
+                    ["luck"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:AddBuff("luck", (tonumber(stats.time) or 10000))
+                        end
+                    end,
+                    ["strength"] = function(stats)
+                        if isStarted("ps-buffs") then   --PS-BUFFS ONLY
+                            exports["ps-buffs"]:AddBuff("strength", (tonumber(stats.time) or 10000))
+                        end
+                    end,
+                }
+
+                if effectTable[stats.effect] then
+                    effectTable[stats.effect](stats)
                 end
             end
-			if stats.effect == "stamina" then
-                if isStarted("ps-buffs") then
-                    debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6Stamina Buff ^2for ^6"..stats.time.."^7ms")
-                    exports["ps-buffs"]:StaminaBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6))
-                else CreateThread(function() StaminaEffect({(tonumber(stats.time) or 10000), (stats.amount or 6)}) end) end
-			end
-            if isStarted("ps-buffs") then   --PS-BUFFS ONLY
-                if stats.effect then debugPrint("^5Debug^7: ^3Consume^7: ^4PS^7-^4Buffs ^2found^7, ^2hooking in to get buffs and applying ^6"..stats.effect.." Buff ^2for ^6"..(stats.time or "nil").."^7ms") end
-                if stats.effect == "armor" then exports["ps-buffs"]:AddArmorBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
-                if stats.effect == "stress" then exports["ps-buffs"]:AddStressBuff((tonumber(stats.time) or 10000), (stats.amount or 6)) end
-                if stats.effect == "swimming" then exports["ps-buffs"]:SwimmingBuffEffect((tonumber(stats.time) or 10000), (stats.amount or 6)) end
-                if stats.effect == "hacking" then exports["ps-buffs"]:AddBuff("hacking", (tonumber(stats.time) or 10000)) end
-                if stats.effect == "intelligence" then exports["ps-buffs"]:AddBuff("intelligence", (tonumber(stats.time) or 10000)) end
-                if stats.effect == "luck" then exports["ps-buffs"]:AddBuff("luck", (tonumber(stats.time) or 10000)) end
-                if stats.effect == "strength" then exports["ps-buffs"]:AddBuff("strength", (tonumber(stats.time) or 10000)) end
+            if stats.widepupils then
+                TriggerEvent("evidence:client:SetStatus", "widepupils", 200)
             end
-            if stats.widepupils then TriggerEvent("evidence:client:SetStatus", "widepupils", 200) end
 		end
 	end
 	cancelled = false
@@ -383,13 +421,25 @@ end)
 CreateThread(function()
     while true do
         Wait(10)
-        if alcoholCount > 0 then Wait(1000 * 60 * 15) alcoholCount -= 1 else Wait(1000) end
-        if drugCount > 0 then Wait(1000 * 60 * 15) drugCount -= 1 else Wait(1000) end
+        if alcoholCount > 0 then
+            Wait(1000 * 60 * 15)
+            alcoholCount -= 1
+        else
+            Wait(1000)
+        end
+        if drugCount > 0 then
+            Wait(1000 * 60 * 15)
+            drugCount -= 1
+        else
+            Wait(1000)
+        end
 	end
 end)
 
 onResourceStop(function()
+
     lockInv(false)
 
     StopEffects()
+
 end, true)
