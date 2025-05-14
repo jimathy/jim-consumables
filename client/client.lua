@@ -218,18 +218,20 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     end)
 
 	while consuming do
-        local drawTable = debugMode and
-        {   "[BackSpace] Stop Consuming",
-            "Time: "..tostring(time),
-            "Type: "..(type or ""),
-            "Hunger: "..(needStats.hunger or 0).."%",
-            "Thirst: "..(needStats.thirst or 0).."%",
-            "Stress: "..(stress or 0).."%",
-            "Heal: "..(heal or 0).."%",
-            "Armour: "..(armor or 0).."%",
-        } or
-        { "[BackSpace] Stop Consuming", }
-        drawText(nil, drawTable, nil, nil)
+        if debugMode then
+            drawText(nil, {
+                "Time: "..tostring(time),
+                "Type: "..(type or ""),
+                "Hunger: "..(needStats.hunger or 0).."%",
+                "Thirst: "..(needStats.thirst or 0).."%",
+                "Stress: "..(stress or 0).."%",
+                "Heal: "..(heal or 0).."%",
+                "Armour: "..(armor or 0).."%",
+            }, nil, nil)
+        end
+        makeInstructionalButtons({
+            { keys = { 194 }, text = "Stop Consuming" },
+         })
         if time <= 0 then
             consuming = false
         end
