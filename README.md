@@ -2,22 +2,16 @@
 Consumables script for QBCore
 
 # What is this?
-This script is designed as a replacement/override for food and drink consumables in `qb-smallresources`
+This script WAS designed as a replacement/override for food and drink consumables in `qb-smallresources`
 
-It's main purpose was to make it so players did not stand up while sitting with my scripts due to lazy events such as ClearPedTasks in progressbar and dpemotes, this one is designed to cancel the animation you have chosen, not all animations.
+It's main purpose was to make it so players did not stand up while sitting with my scripts due to lazy events such as ClearPedTasks in progressbar and dpemotes, this one is designed to cancel the animation you have chosen, not ALL animations.
+
+Users requested I readd the progressbar but it ended up being a config option to enable it
+Though if your players are cancelling all animations when consuming
 
 It's recommended to set `Config.UseProgBar` to `false` to get this effect.
 
-# THIS DOESN'T USE DPEMOTES OR RPEMOTES 
-# YOU **NEED** TO PUT THE EMOTES IN THE BOTTOM OF THE CONFIG.LUA
-
-## v1.5 Update Information
-	I've added a export system that allows scripts to easily add new foods and drinks to be usable and then sync them between players
-	This should work but may have issues.
-
-	But because of the export system being used, Jim-Consumables **NEEDS** to start before any scripts that use it.
-
-	This will be built into my scripts that use consumables to make it more plug and play
+# THIS DOESN'T USE DPEMOTES OR RPEMOTES OR SCULLYS EMOTEMENU
 
 # Installation
 
@@ -51,25 +45,35 @@ ensure [jim]
 ## New Items
 To add an item, you only need to add a new item table in the Config.Consumables like this:
 ```lua
-["heartstopper"] = {
-	emote = "burger",			-- Select an emote from below, it has to be in here
-	time = math.random(5000, 6000),		-- Amount of time it takes to consume the item
-	stress = math.random(1, 2),		-- Amount of stress relief, can be 0
-	heal = 0,				-- Set amount to heal by after consuming
-	armor = 5,				-- Amount of armor to add
-	type = "food",				-- Type: "alcohol" / "drink" / "food"
-	returnItem = {						-- Item that will be given when the item is used
-		item = "plastic",				-- eg. Plastic bottles can give "plastic"
-		amount = 1,
-	},
-	stats = {
-		screen = "rampage",		-- The screen effect to be played when after consuming the item
-		effect = "heal", 		-- The status effect given by the item, "heal" / "stamina"
-		time = 10000,			-- How long the effect should last (if not added it will default to 10000)
-		amount = 2,			-- How much the value is changed by per second
-		hunger = math.random(10,20),	-- The hunger/thirst stats of the item, if not found in the items.lua
-		thirst = math.random(10,20),	-- The hunger/thirst stats of the item, if not found in the items.lua
-	},
+heartstopper = {
+    emote = "burger", 							-- Select an emote from below, it has to be in here
+    time = math.random(5000, 6000),				-- Amount of time it takes to consume the item
+    stress = math.random(1,2),					-- Amount of stress relief, can be 0
+    heal = 0, 									-- Set amount to heal by after consuming
+    armor = 5,									-- Amount of armor to add
+    type = "food",								-- Type: "alcohol" / "drink" / "food"
+    canRun = true,								-- If true player can run while using the item, not to it will cancel the event
+
+    stats = {
+        screen = "thermal",						-- The screen effect to be played when after consuming the item "rampage" "turbo" "focus" "weed" "trevor" "nightvision" "thermal"
+        effect = "heal",						-- The status effect given by the item, "heal" / "stamina"
+												-- This supports ps-buffs effects "armor" "stress" "swimming" "hacking" "intelligence" "luck" "strength"
+        time = 10000,							-- How long the effect should last (if not added it will default to 10000)
+        amount = 6,								-- How much the value is changed by per second
+        hunger = math.random(10, 20),			-- The hunger/thirst stats of the item, if not found in the items.lua
+        thirst = math.random(10, 20),			-- The hunger/thirst stats of the item, if not found in the items.lua
+        canOD = true,							-- This creates an OD Effect, killing the user if they have too much
+    },
+    --Reward Items Variables
+                                                -- These can be the only thing in a consumable table and the item will still work
+    amounttogive = 3,							-- Used for "RewardItems", tells the script how many to give
+    rewards = {
+        [1] = {
+            item = "plastic", 					-- prize item name
+            max = 10,							    -- max amount to give (this is put into math.random(1, max) )
+            rarity = 1,							-- the rarity system, 1 being rarest, 4 being most common
+        },
+    },
 },
 ```
 Consuming an item can also manually activate screen effects
@@ -84,6 +88,19 @@ The example above uses `rampage` as this is what the effect is named after, you 
 	"trevor"
 	"nightvision"
 	"thermal"
+```
+```lua
+    -- Example Box Item
+["9_box"] = {                                     -- Name of the box item in the shared items
+    emote = "uncuff",                             -- The emote than should run when "unboxing"
+    canRun = true,                                -- If true player can run while using the item, not to it will cancel the event
+    time = 3500,                                  -- How long it takes to use the item
+    type = "pack",                                -- Designate it as a "pack" to the script knows what to do
+    pack = {
+        item = "9_ammo",                          -- The item to give from the box when complete
+        amount = 20                               -- How many of the item to give
+    },
+},
 ```
 
 ## PS-Buffs Support
