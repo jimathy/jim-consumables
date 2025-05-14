@@ -7,9 +7,8 @@ This script WAS designed as a replacement/override for food and drink consumable
 It's main purpose was to make it so players did not stand up while sitting with my scripts due to lazy events such as ClearPedTasks in progressbar and dpemotes, this one is designed to cancel the animation you have chosen, not ALL animations.
 
 Users requested I readd the progressbar but it ended up being a config option to enable it
-Though if your players are cancelling all animations when consuming
 
-It's recommended to set `Config.UseProgBar` to `false` to get this effect.
+Though if your players are cancelling all animations when consuming, it's recommended to set `Config.UseProgBar` to `false` to get this effect.
 
 # THIS DOESN'T USE DPEMOTES OR RPEMOTES OR SCULLYS EMOTEMENU
 
@@ -89,6 +88,15 @@ The example above uses `rampage` as this is what the effect is named after, you 
 	"nightvision"
 	"thermal"
 ```
+
+You can also now create "Box" items, when setting type to "pack", it will act as if you user is opening a box
+
+Examples:
+ - Ammo boxes that give clips
+ - Packets of cigarretes
+ - Crates of beer
+
+How to set up these:
 ```lua
     -- Example Box Item
 ["9_box"] = {                                     -- Name of the box item in the shared items
