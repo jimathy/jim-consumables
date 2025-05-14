@@ -133,10 +133,20 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             bone2 = GetPedBoneIndex(Player, emote.AnimationOptions.SecondPropBone)
             P7, P8, P9, P10, P11, P12 = table.unpack(emote.AnimationOptions.SecondPropPlacement)
         end
-	end
+    end
 
-	if consuming then
-		cancelled = true
+    if type == "drink" or type == "alcohol" then
+        string = "Drinking "
+    elseif type == "food" then
+        string = "Eating "
+    elseif type == "smoke" then
+        string = "Smoking "
+    elseif type == "pack" then
+        string = "Opening "
+    end
+
+    if consuming then
+        cancelled = true
         debugPrint("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.")
         tempLockInv(false)
         if Config.UseProgbar then
