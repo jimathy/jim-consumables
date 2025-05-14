@@ -1,6 +1,6 @@
 name "Jim-Consumables"
 author "Jimathy"
-version "2.0.01"
+version "2.0.02"
 description "Consumables Script"
 fx_version "cerulean"
 game "gta5"
@@ -14,7 +14,7 @@ shared_scripts {
     'shared/consumables.lua',
     'shared/shared.lua',
 
-    --Jim Bridge - https://github.com/jimathy/jim-bridge
+    --Jim Bridge - https://github.com/jimathy/jim_bridge
     '@jim_bridge/starter.lua',
 }
 
