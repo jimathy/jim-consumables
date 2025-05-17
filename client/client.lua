@@ -33,10 +33,12 @@ onPlayerLoaded(function()
 end, true)
 
 RegisterNetEvent(getScript()..':Consume', function(itemName)
+    if not Consumables[itemName] then return end
+    local consumable = Consumables[itemName]
     if not hasItem(itemName, 1) then
         print("^5Debug^7: ^1Error^7: ^2Item not found in inventory^7, ^2stopping^7..")
     end
-    local requiredItem = Consumables[itemName].requiredItem or nil
+    local requiredItem = consumable and consumable.requiredItem or nil
 
     if requiredItem then
         if not hasItem(requiredItem, 1) then
@@ -50,7 +52,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     debugPrint("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..")
     tempLockInv(true)
     local Player = PlayerPedId()
-	local emote = Emotes[Consumables[itemName].emote] or Emotes["crisps"]
+	local emote = Emotes[consumable.emote] or Emotes["crisps"]
     if isAnimal then        --- Animal ped adjustments
         local presets = {
             ["default"] = {
@@ -98,31 +100,31 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                 Prop = "v_res_tt_bowl",
                 PropBone = 64081,
                 PropPlacement = propPlacement,
-                SecondProp = Emotes[Consumables[itemName].emote].AnimationOptions.Prop or nil,
-                SecondPropBone = Emotes[Consumables[itemName].emote].AnimationOptions.Prop and 64081 or nil,
-                SecondPropPlacement = Emotes[Consumables[itemName].emote].AnimationOptions.Prop and propPlacement2 or nil,
+                SecondProp = Emotes[consumable.emote].AnimationOptions.Prop or nil,
+                SecondPropBone = Emotes[consumable.emote].AnimationOptions.Prop and 64081 or nil,
+                SecondPropPlacement = Emotes[consumable.emote].AnimationOptions.Prop and propPlacement2 or nil,
             },
         }
     end
 
-    local returnItem = Consumables[itemName].returnItem or nil
+    local returnItem = consumable.returnItem or nil
 	local animDict, anim = tostring(emote[1]), tostring(emote[2])
 	local model, model2, bone, bone2, drugeffect, stress
 	local P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) -- Default placement coord cariable
-    local RewardItem = Consumables[itemName].rewards or nil
-	local type = Consumables[itemName].type or ""
-    local pack = Consumables[itemName].pack or nil
+    local RewardItem = consumable.rewards or nil
+	local type = consumable.type or ""
+    local pack = consumable.pack or nil
     local string = "Using "
-    local canRun = Consumables[itemName].canRun
-    local stats = Consumables[itemName].stats
+    local canRun = consumable.canRun
+    local stats = consumable.stats
 
     local time, stress, heal, armor, needStats = GenerateRandomValues({
-        time = Consumables[itemName].time or { 5000, 6000 },
-        stress = Consumables[itemName].stress or 0,
-        heal = Consumables[itemName].heal or 0,
-        armor = Consumables[itemName].armor or 0,
-        hunger = Consumables[itemName].stats and Consumables[itemName].stats.hunger or 0,
-        thirst = Consumables[itemName].stats and Consumables[itemName].stats.thirst or 0,
+        time = consumable.time or { 5000, 6000 },
+        stress = consumable.stress or 0,
+        heal = consumable.heal or 0,
+        armor = consumable.armor or 0,
+        hunger = consumable.stats and consumable.stats.hunger or 0,
+        thirst = consumable.stats and consumable.stats.thirst or 0,
     })
     if emote.AnimationOptions.Prop then
 		model = emote.AnimationOptions.Prop
@@ -274,7 +276,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         CreateThread(function()
             if RewardItem then
                 debugPrint("Reward Item detected")
-                for i = 1, Consumables[itemName].amounttogive do
+                for i = 1, consumable.amounttogive do
                     local rarity = math.random(1, 4) -- rarity calculation
                     while true do
                         local item = math.random(1, countTable(RewardItem)) -- random item in the list to pick
