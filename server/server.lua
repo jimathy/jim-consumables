@@ -19,14 +19,37 @@ onResourceStop(function()
 end)
 
 RegisterNetEvent(getScript()..':server:addNeed', function(amount, type)
-    local Player = Core.Functions.GetPlayer(source) if not Player then return end
-	if type == "thirst" then
-		Player.Functions.SetMetaData('thirst', amount)
-		TriggerClientEvent('hud:client:UpdateNeeds', source, Player.PlayerData.metadata.hunger, amount)
-	elseif type == "hunger" then
-		Player.Functions.SetMetaData('hunger', amount)
-		TriggerClientEvent('hud:client:UpdateNeeds', source, amount, Player.PlayerData.metadata.thirst)
-	end
+    local src = source
+
+    if Core.Functions and Core.Functions.GetPlayer then -- QBCore/QBox
+        local Player = Core.Functions.GetPlayer(src)
+        if not Player then return end
+
+        if type == "thirst" then
+            Player.Functions.SetMetaData('thirst', amount)
+            TriggerClientEvent('hud:client:UpdateNeeds', src, Player.PlayerData.metadata.hunger, amount)
+        elseif type == "hunger" then
+            Player.Functions.SetMetaData('hunger', amount)
+            TriggerClientEvent('hud:client:UpdateNeeds', src, amount, Player.PlayerData.metadata.thirst)
+        end
+
+    elseif ESX and ESX.GetPlayerFromId then -- ESX
+        local xPlayer = ESX.GetPlayerFromId(src)
+        if not xPlayer then return end
+
+        local hunger = xPlayer.get('hunger') or 0
+        local thirst = xPlayer.get('thirst') or 0
+
+        if type == "thirst" then
+            thirst = amount
+            xPlayer.set('thirst', thirst)
+        elseif type == "hunger" then
+            hunger = amount
+            xPlayer.set('hunger', hunger)
+        end
+
+        TriggerClientEvent('hud:client:UpdateNeeds', src, hunger, thirst)
+    end
 end)
 
 local syncScheduled = false

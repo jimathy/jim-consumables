@@ -314,10 +314,23 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         end)
         if needStats then
             if needStats.hunger then
-                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["hunger"] + needStats.hunger, "hunger")
+                local hunger = 0
+                if Core.Functions and Core.Functions.GetPlayerData then
+                    hunger = Core.Functions.GetPlayerData().metadata["hunger"] or 0
+                elseif ESX and ESX.GetPlayerData then
+                    hunger = ESX.GetPlayerData().hunger or 0
+                end
+                TriggerServerEvent(getScript()..":server:addNeed", hunger + needStats.hunger, "hunger")
             end
+
             if needStats.thirst then
-                TriggerServerEvent(getScript()..":server:addNeed", Core.Functions.GetPlayerData().metadata["thirst"] + needStats.thirst, "thirst")
+                local thirst = 0
+                if Core.Functions and Core.Functions.GetPlayerData then
+                    thirst = Core.Functions.GetPlayerData().metadata["thirst"] or 0
+                elseif ESX and ESX.GetPlayerData then
+                    thirst = ESX.GetPlayerData().thirst or 0
+                end
+                TriggerServerEvent(getScript()..":server:addNeed", thirst + needStats.thirst, "thirst")
             end
         end
         debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(needStats.hunger or 0).."^7] ^2Thrist^7: [^6"..(needStats.thirst or 0).."^7]" )
