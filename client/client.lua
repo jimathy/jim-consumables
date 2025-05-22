@@ -1,36 +1,56 @@
 local alcoholCount, drugCount, consuming, cancelled = 0, 0, false, false
 Consumables, Emotes = {}, {}
 
-local function syncConsumables()
-    Consumables = triggerCallback(getScript()..":server:syncConsumables")
-    Emotes = triggerCallback(getScript()..":server:syncEmotes")
-    debugPrint("^5Debug^7: ^2Retrieved ^6"..countTable(Consumables).." ^2Items and ^6"..countTable(Emotes).." ^2Emotes^7")
-end
-
-RegisterNetEvent(getScript()..":client:syncConsumables", function(NewConsumables)
-    if debugMode then
-        for k, v in pairs(NewConsumables) do
-            if not Consumables[k] then
-                print("^5Debug^7: ^2New Item Info added^7: ^6"..k.."^7")
-            end
-        end
-    end
-    Consumables = NewConsumables
-end)
-RegisterNetEvent(getScript()..":client:syncEmotes", function(NewEmotes)
-    if debugMode then
-        for k, v in pairs(NewEmotes) do
-            if not Emotes[k] then
-                print("^5Debug^7: ^2New Emote Info added^7: ^6"..k.."^7")
-            end
-        end
-    end
-    Emotes = NewEmotes
-end)
-
 onPlayerLoaded(function()
-    syncConsumables()
+    -- Wait until statebag exists, then trigger local handler
+    CreateThread(function()
+        while not GlobalState.jimConsumableItems do Wait(100) end
+		local newConsumables = GlobalState.jimConsumableItems
+        for k in pairsByKeys(newConsumables) do
+            if not Consumables[k] then
+                debugPrint("^5Statebag^7: ^2New ^3Consumable ^2Info synced^7: ^6"..k.."^7")
+            end
+        end
+        while not GlobalState.jimConsumableEmotes do Wait(100) end
+        local newEmotes = GlobalState.jimConsumableEmotes
+        for k in pairsByKeys(newEmotes) do
+            if not Emotes[k] then
+                debugPrint("^5Statebag^7: ^2New ^3Emote ^2Info synced^7: ^6"..k.."^7")
+            end
+        end
+        Consumables = newConsumables
+        Emotes = newEmotes
+        debugPrint("^5Statebag^7: ^2Synced ^6"..countTable(Consumables).." ^2Items and ^6"..countTable(Emotes).." ^2Emotes^7")
+    end)
 end, true)
+
+-- Handlers to recieve global statebag data from the server
+AddStateBagChangeHandler("jimConsumableItems", nil, function(bagName, key, value, _unused)
+    if type(value) == "table" then
+        local newItemCount = 0
+        for k in pairsByKeys(value) do
+            if not Consumables[k] then
+                newItemCount += 1
+                debugPrint("^5Statebag^7: ^2New ^3Consumable ^2Info synced^7: ^6"..k.."^7")
+            end
+        end
+        Consumables = value
+        debugPrint("^5Statebag^7: ^2Synced ^6"..newItemCount.." ^2new Consumables^7")
+    end
+end)
+AddStateBagChangeHandler("jimConsumableEmotes", nil, function(bagName, key, value, _unused)
+    if type(value) == "table" then
+        local newEmoteCount = 0
+        for k in pairsByKeys(value) do
+            if not Emotes[k] then
+                newEmoteCount += 1
+                debugPrint("^5Statebag^7: ^2New ^3Emote ^2Info synced^7: ^6"..k.."^7")
+            end
+        end
+        Emotes = value
+        debugPrint("^5Statebag^7: ^2Synced ^6"..newEmoteCount.." ^2new Emotes^7")
+    end
+end)
 
 RegisterNetEvent(getScript()..':Consume', function(itemName)
     if not Consumables[itemName] then return end

@@ -9,10 +9,14 @@ onResourceStart(function()
     end
 
     --Export Import System--
-    createCallback(getScript()..':server:syncConsumables', function(source) return Consumables end)
-    createCallback(getScript()..':server:syncEmotes', function(source) return Emotes end)
-
+    GlobalState.jimConsumableItems = Consumables
+    GlobalState.jimConsumableEmotes = Emotes
 end, true)
+
+onResourceStop(function()
+    GlobalState.jimConsumableItems = Consumables
+    GlobalState.jimConsumableEmotes = Emotes
+end)
 
 RegisterNetEvent(getScript()..':server:addNeed', function(amount, type)
     local Player = Core.Functions.GetPlayer(source) if not Player then return end
@@ -27,14 +31,15 @@ end)
 
 local syncScheduled = false
 function syncConsumables()
-	debugPrint("^5Debug^7: ^2Sending ^6"..countTable(Consumables).." ^3Consumables ^2to all clients^7")
-    TriggerClientEvent(getScript()..":client:syncConsumables", -1, Consumables)
+	debugPrint("^5Statebag^7: ^2Sending ^6"..countTable(Consumables).." ^3Consumables ^2to all clients^7")
+    GlobalState.jimConsumableItems = Consumables
     syncScheduled = false
 end
+
 local emoteSyncScheduled = false
 function syncEmotes()
-	debugPrint("^5Debug^7: ^2Sending ^6"..countTable(Emotes).." ^3Emotes to all clients^7")
-    TriggerClientEvent(getScript()..":client:syncEmotes", -1, Emotes)
+	debugPrint("^5Statebag^7: ^2Sending ^6"..countTable(Emotes).." ^3Emotes to all clients^7")
+    GlobalState.jimConsumableEmotes = Emotes
     emoteSyncScheduled = false
 end
 
@@ -45,7 +50,7 @@ RegisterNetEvent(getScript()..':server:syncAddItem', function(itemName, data)
         debugPrint("^5Debug^7: "..GetInvokingResource().." ^2is sending new ^3Item^7: '"..itemName.."'")
         if not syncScheduled then
             syncScheduled = true
-            Citizen.SetTimeout(5000, syncConsumables)
+            SetTimeout(5000, syncConsumables)
         end
     else
         debugPrint("^1Debug^7: "..GetInvokingResource().." ^2is sending ^1duplicate ^3Item^7: '"..itemName.."'")
@@ -58,20 +63,13 @@ RegisterNetEvent(getScript()..':server:syncAddEmote', function(emoteName, data)
         debugPrint("^5Debug^7: "..GetInvokingResource().." ^2is sending new ^3Emote^7: '"..emoteName.."'")
         if not emoteSyncScheduled then
             emoteSyncScheduled = true
-            Citizen.SetTimeout(5000, syncEmotes)
+            SetTimeout(5000, syncEmotes)
         end
     else
         debugPrint("^1Debug^7: "..GetInvokingResource().." ^2is sending ^1duplicate ^3Emote^7: '"..emoteName.."'")
     end
 end)
 
-RegisterNetEvent(getScript()..":server:syncConsumables", function()
-    TriggerClientEvent(getScript()..':client:syncConsumables', -1, Consumables)
-end)
-RegisterNetEvent(getScript()..":server:syncEmotes", function()
-    TriggerClientEvent(getScript()..':client:syncEmotes', -1, Emotes)
-
-end)
 --[[
 Core.Commands.Add('consumableCreator', "Create consumables (admin only)", {}, false, function(source)
     if source > 0 then return TriggerClientEvent(getScript()..":client:consumableCreator", source) end
