@@ -1,6 +1,7 @@
-2.0.02
+2.0.03
 
-- Update readme to include information on "packs"
-- Add fallback if the consume function is triggered and no consumable info is found
+- Convert to Global Statebags for optimized data syncing
+- Fix hunger/thirst for esx
+- Possible fix for imported items not being usable
 
 https://github.com/jimathy/jim-consumables
