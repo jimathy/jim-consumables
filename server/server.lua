@@ -69,7 +69,7 @@ end
 RegisterNetEvent(getScript()..':server:syncAddItem', function(itemName, data)
     if not Consumables[itemName] then
         Consumables[itemName] = data
-        createUseableItem(itemName, function(source, item) TriggerClientEvent(getScript()..':Consume', source, itemName) end)
+        --createUseableItem(itemName, function(source, item) TriggerClientEvent(getScript()..':Consume', source, itemName) end)
         debugPrint("^5Debug^7: "..GetInvokingResource().." ^2is sending new ^3Item^7: '"..itemName.."'")
         if not syncScheduled then
             syncScheduled = true
