@@ -313,24 +313,33 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             end
         end)
         if needStats then
-            if needStats.hunger then
+            jsonPrint(needStats)
+            if needStats.hunger > 0 then
                 local hunger = 0
-                if Core.Functions and Core.Functions.GetPlayerData then
-                    hunger = Core.Functions.GetPlayerData().metadata["hunger"] or 0
+                if Core and Core.Functions then
+                    hunger = (Core.Functions.GetPlayerData().metadata["hunger"] or 0) + needStats.hunger
+                    hunger = hunger > 100 and 100 or hunger
+
                 elseif ESX and ESX.GetPlayerData then
-                    hunger = ESX.GetPlayerData().hunger or 0
+                    hunger = (needStats.thirst / 100) * 1000000
+                    hunger = hunger > 1000000 and 1000000 or hunger
                 end
-                TriggerServerEvent(getScript()..":server:addNeed", hunger + needStats.hunger, "hunger")
+
+                TriggerServerEvent(getScript()..":server:setNeed", "hunger", hunger)
             end
 
-            if needStats.thirst then
+            if needStats.thirst > 0 then
                 local thirst = 0
-                if Core.Functions and Core.Functions.GetPlayerData then
-                    thirst = Core.Functions.GetPlayerData().metadata["thirst"] or 0
+                if Core and Core.Functions then
+                    thirst = (Core.Functions.GetPlayerData().metadata["thirst"] or 0) + needStats.thirst
+                    thirst = thirst > 100 and 100 or thirst
+
                 elseif ESX and ESX.GetPlayerData then
-                    thirst = ESX.GetPlayerData().thirst or 0
+                    thirst = (needStats.thirst / 100) * 1000000
+                    thirst = thirst > 1000000 and 1000000 or thirst
                 end
-                TriggerServerEvent(getScript()..":server:addNeed", thirst + needStats.thirst, "thirst")
+
+                TriggerServerEvent(getScript()..":server:setNeed", "thirst", thirst)
             end
         end
         debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(needStats.hunger or 0).."^7] ^2Thrist^7: [^6"..(needStats.thirst or 0).."^7]" )
