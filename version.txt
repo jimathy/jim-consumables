@@ -1,7 +1,5 @@
-2.0.03
+2.0.04
 
-- Convert to Global Statebags for optimized data syncing
-- Fix hunger/thirst for esx
-- Possible fix for imported items not being usable
+- Fix hunger and thirst events
 
 https://github.com/jimathy/jim-consumables
