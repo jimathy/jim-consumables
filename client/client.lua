@@ -321,7 +321,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                     hunger = hunger > 100 and 100 or hunger
 
                 elseif ESX and ESX.GetPlayerData then
-                    hunger = (needStats.thirst / 100) * 1000000
+                    hunger = (needStats.hunger / 100) * 1000000
                     hunger = hunger > 1000000 and 1000000 or hunger
                 end
 
