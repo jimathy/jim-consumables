@@ -172,7 +172,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         debugPrint("^5Debug^7: ^3Consume^7: ^2Event already started^7, ^1Cancelling^7.")
         tempLockInv(false)
         if Config.UseProgbar then
-            stopPropgressBar()
+            stopProgressBar()
         else
             triggerNotify(nil, "Stopped "..string, "error")
         end
@@ -208,9 +208,17 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     debugPrint("^5Debug^7: ^3Consume^7: ^2Player Movement Flag^7 - ^6"..json.encode(MovementType).." ^7")
     if Config.Main.UseProgbar then
         CreateThread(function()
-            if progressBar({ time = time, label = string..Items[itemName].label.."..", dead = false, cancel = false}) then
+            if progressBar({
+                time = time,
+                label = string..Items[itemName].label.."..",
+                dead = false,
+                disableMovement = false,
+                disableCombat = true,
+                cancel = false
+            }) then
                 consuming = false
             else
+                consuming = false
             end
         end)
     else
@@ -273,7 +281,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             tempLockInv(false)
             hideText()
             if Config.Main.UseProgbar then
-                stopPropgressBar()
+                stopProgressBar()
             else
                 triggerNotify(nil, "Cancelled "..string, "error")
             end

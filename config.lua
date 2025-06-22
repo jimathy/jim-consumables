@@ -10,7 +10,7 @@ Config = {
 
 	},
 	Main = {
-		UseProgbar = false,		-- Disabled this, progress bars stop all anims when complete.
+		UseProgbar = false,		-- Recommended to disable this, progress bars stop ALL anims when complete.
 								-- This is intended to create a progressbar to show consuming but it was usually forces animations to end weirdly
 	},
 	Crafting = {
