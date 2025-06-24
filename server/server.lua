@@ -3,7 +3,7 @@ local Emotes = Config.Emotes
 
 onResourceStart(function()
     for k, v in pairs(Config.Consumables) do
-        createUseableItem(k, function(source, item) TriggerClientEvent(getScript()..':Consume', source, item.name) end)
+        createUseableItem(k, function(source, item) TriggerClientEvent(getScript()..':Consume', source, k) end)
         if not Items[k] then print("^1Debug^7: ^2Item check ^7- '^1"..k.."^7' ^2not found in the shared lua^7") end
         if not Config.Emotes[v.emote] then print("^1Debug^7: ^2Emote check ^7- '^1"..k.."^7' ^2requested emote ^7'^6"..v.emote.."^7' - ^2not found in config^7.^2lua^7") end
     end
