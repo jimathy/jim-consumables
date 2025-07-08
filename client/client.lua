@@ -72,6 +72,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     debugPrint("^5Debug^7: ^3Consume^7: ^2Starting event, locking inventory and grabbing data^7..")
     tempLockInv(true)
     local Player = PlayerPedId()
+    local pedCoords = GetEntityCoords(Player)
 	local emote = Emotes[consumable.emote] or Emotes["crisps"]
     if isAnimal then        --- Animal ped adjustments
         local presets = {
@@ -232,11 +233,11 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         if model then
             if IsModelValid(model) == 1 then
                 debugPrint("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7...")
-                attachProp = makeProp({ prop = model, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                attachProp = makeProp({ prop = model, coords = vec4(pedCoords.x, pedCoords.y, pedCoords.z, 0.0)}, 1, 1)
                 AttachEntityToEntity(attachProp, Player, bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
                 if model2 then
                     if IsModelValid(model2) == 1 then
-                        attachProp2 = makeProp({ prop = model2, coords = vector4(0.0,0.0,0.0,0.0)}, 1, 1)
+                        attachProp2 = makeProp({ prop = model2, coords = vec4(pedCoords.x, pedCoords.y, pedCoords.z, 0.0)}, 1, 1)
                         AttachEntityToEntity(attachProp2, Player, bone2, P7, P8, P9, P10, P11, P12, true, true, false, true, 1, true)
                     else
                         print("^5Debug^7: ^3PropSpawn^7: ^2Second prop model isn't valid/found^7.")
@@ -250,7 +251,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                 if DoesEntityExist(attachProp2) then
                     destroyProp(attachProp2)
                     attachProp2 = nil
-                 end
+                end
             else
                 print("^5Debug^7: ^3PropSpawn^7: ^2Prop model isn't valid/found^7.")
             end
@@ -271,7 +272,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         end
         makeInstructionalButtons({
             { keys = { 194 }, text = "Stop Consuming" },
-         })
+        })
         if time <= 0 then
             consuming = false
         end
