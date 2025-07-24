@@ -47,7 +47,7 @@ Config.Consumables = {
 --        heal = 0, 									-- Set amount to heal by after consuming
 --        armor = 5,									-- Amount of armor to add
 --        type = "food",								-- Type: "alcohol" / "drink" / "food"
---        canRun = true,                                -- If true player can run while using the item, not to it will cancel the event
+--        canRun = true,                                -- If true player can run while using the item, if not it will cancel the event
 --
 --        stats = {
 --            screen = "thermal",						-- The screen effect to be played when after consuming the item "rampage" "turbo" "focus" "weed" "trevor" "nightvision" "thermal"
@@ -74,7 +74,7 @@ Config.Consumables = {
     -- Example Box Item
 --    ["9_box"] = {                                     -- Name of the box item in the shared
 --        emote = "uncuff",                             -- The emote than should run when "unboxing"
---        canRun = true,                                -- If true player can run while using the item, not to it will cancel the event
+--        canRun = true,                                -- If true player can run while using the item, if not it will cancel the event
 --        time = 3500,                                  -- How long it takes to use the item
 --        type = "pack",                                -- Designate it as a "pack" to the script knows what to do
 --        pack = {
@@ -83,4 +83,18 @@ Config.Consumables = {
 --        },
 --    },
 
+    -- Example Cigar Item wiht requirements
+--    ["cigar"] = {                                     -- Name of the item in your shared items
+--        emote = "smokecigar",                         -- The emote than should run when "smoking"
+--        canRun = true,                                -- If true player can run while using the item, if not it will cancel the event
+--        time = math.random(5000, 6000),               -- How long it takes to use the item
+--        type = "smoke",                               -- Designate it as a "smoke" to the script knows what to do
+--        requiredItem = "lighter",                     -- Set a required item making it unsable if they don't have it
+--        stats = {
+--            effect = "stress",
+--            time = 5000,
+--            amount = math.random(10, 15),
+--            canOD = false
+--        }
+--    },
 }
