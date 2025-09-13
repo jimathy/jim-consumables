@@ -38,6 +38,7 @@ AddStateBagChangeHandler("jimConsumableItems", nil, function(bagName, key, value
         debugPrint("^5Statebag^7: ^2Synced ^6"..newItemCount.." ^2new Consumables^7")
     end
 end)
+
 AddStateBagChangeHandler("jimConsumableEmotes", nil, function(bagName, key, value, _unused)
     if type(value) == "table" then
         local newEmoteCount = 0
@@ -128,13 +129,10 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         }
     end
 
-    local returnItem = consumable.returnItem or nil
 	local animDict, anim = tostring(emote[1]), tostring(emote[2])
 	local model, model2, bone, bone2, drugeffect, stress
 	local P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12 = table.unpack({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) -- Default placement coord cariable
-    local RewardItem = consumable.rewards or nil
 	local type = consumable.type or ""
-    local pack = consumable.pack or nil
     local string = "Using "
     local canRun = consumable.canRun
     local stats = consumable.stats
@@ -233,7 +231,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         if model then
             if IsModelValid(model) == 1 then
                 debugPrint("^5Debug^7: ^3PropSpawn^7: ^2Spawning consumable prop^7...")
-                attachProp = makeProp({ prop = model, coords = vec4(pedCoords.x, pedCoords.y, pedCoords.z, 0.0)}, 1, 1)
+                attachProp = makeProp({ prop = model, coords = vec4(pedCoords.x, pedCoords.y, pedCoords.z, 0.0)}, 1, 1, true)
                 AttachEntityToEntity(attachProp, Player, bone, P1, P2, P3, P4, P5, P6, true, true, false, true, 1, true)
                 if model2 then
                     if IsModelValid(model2) == 1 then
@@ -286,72 +284,45 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             else
                 triggerNotify(nil, "Cancelled "..string, "error")
             end
+            TriggerServerEvent(getScript()..":server:stopConsume")
         end
         Wait(0)
         time -= 12
 	end
 	StopEntityAnim(Player, anim, animDict, 1.0)
     unloadAnimDict(animDict)
+
 	if not cancelled then
         hideText()
-        removeItem(itemName, 1)
-        if returnItem ~= nil then
-            debugPrint("returnItem detected")
-            currentToken = triggerCallback(AuthEvent)
-            addItem(returnItem.item, returnItem.amount)
-        end
+            local needTypes = { }
 
-        -- Reward Item calculations
-        CreateThread(function()
-            if RewardItem then
-                debugPrint("Reward Item detected")
-                for i = 1, consumable.amounttogive do
-                    local rarity = math.random(1, 4) -- rarity calculation
-                    while true do
-                        local item = math.random(1, countTable(RewardItem)) -- random item in the list to pick
-                        if RewardItem[item].rarity >= rarity then
-                            currentToken = triggerCallback(AuthEvent)
-                            addItem(RewardItem[item].item, math.random(1, RewardItem[item].max or 1))
-                            debugPrint("^5Debug^7: ^2Given reward prize^7: '^6"..RewardItem[item].item.."^7'")
-                            break
-                        end
-                        Wait(100)
-                    end
-                    Wait(1500)
-                end
-            end
-        end)
         if needStats then
-            jsonPrint(needStats)
+
+            --jsonPrint(needStats)
             if needStats.hunger > 0 then
-                local hunger = 0
                 if Core and Core.Functions then
-                    hunger = (Core.Functions.GetPlayerData().metadata["hunger"] or 0) + needStats.hunger
-                    hunger = hunger > 100 and 100 or hunger
+                    needTypes.hunger = (Core.Functions.GetPlayerData().metadata["hunger"] or 0) + needStats.hunger
+                    needTypes.hunger = needTypes.hunger > 100 and 100 or needTypes.hunger
 
                 elseif ESX and ESX.GetPlayerData then
-                    hunger = (needStats.hunger / 100) * 1000000
-                    hunger = hunger > 1000000 and 1000000 or hunger
+                    needTypes.hunger = (needStats.hunger / 100) * 1000000
+                    needTypes.hunger = needTypes.hunger > 1000000 and 1000000 or needTypes.hunger
                 end
-
-                TriggerServerEvent(getScript()..":server:setNeed", "hunger", hunger)
             end
 
             if needStats.thirst > 0 then
-                local thirst = 0
                 if Core and Core.Functions then
-                    thirst = (Core.Functions.GetPlayerData().metadata["thirst"] or 0) + needStats.thirst
-                    thirst = thirst > 100 and 100 or thirst
+                    needTypes.thirst = (Core.Functions.GetPlayerData().metadata["thirst"] or 0) + needStats.thirst
+                    needTypes.thirst = needTypes.thirst > 100 and 100 or needTypes.thirst
 
                 elseif ESX and ESX.GetPlayerData then
-                    thirst = (needStats.thirst / 100) * 1000000
-                    thirst = thirst > 1000000 and 1000000 or thirst
+                    needTypes.thirst = (needStats.thirst / 100) * 1000000
+                    needTypes.thirst = needTypes.thirst > 1000000 and 1000000 or needTypes.thirst
                 end
-
-                TriggerServerEvent(getScript()..":server:setNeed", "thirst", thirst)
             end
         end
-        debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(needStats.hunger or 0).."^7] ^2Thrist^7: [^6"..(needStats.thirst or 0).."^7]" )
+            TriggerServerEvent(getScript()..":server:finishConsume", needTypes)
+
         if stress and stress ~= 0 then
             debugPrint("^5Debug^7: ^3Consume^7: ^2Relieving ^6"..stress.." ^2stress^7.")
             TriggerServerEvent('hud:server:RelieveStress', stress)
@@ -375,10 +346,6 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                     AlienEffect()
                 end) -- Used as overdosing/too drunk effect
             end
-        end
-        if pack then
-            currentToken = triggerCallback(AuthEvent)
-            addItem(pack.item, pack.amount)
         end
         if stats then
             if stats.screen then -- Screen effect activation
