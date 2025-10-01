@@ -325,7 +325,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 
         if stress and stress ~= 0 then
             debugPrint("^5Debug^7: ^3Consume^7: ^2Relieving ^6"..stress.." ^2stress^7.")
-            TriggerServerEvent('hud:server:RelieveStress', stress)
+            needTypes.stress = stress
         end
 		if heal and heal ~= 0 then
             debugPrint("^5Debug^7: ^3Consume^7: ^2Healing player by^7: ^6"..heal)

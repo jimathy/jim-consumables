@@ -142,12 +142,17 @@ RegisterNetEvent(getScript()..":server:finishConsume", function(needTypes)
 
         -- Needs
         if needTypes.thirst then
+            debugPrint("^5Debug^7: ^2Thrist^7: [^6"..(needTypes.thirst or 0).."^7]")
             setThirst(src, needTypes.thirst)
         end
         if needTypes.hunger then
+            debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(needTypes.hunger or 0).."^7]")
             setHunger(src, needTypes.hunger)
         end
-        debugPrint("^5Debug^7: ^2Hunger^7: [^6"..(needTypes.hunger or 0).."^7] ^2Thrist^7: [^6"..(needTypes.thirst or 0).."^7]" )
+        if needTypes.stress then
+            debugPrint("^5Debug^7: ^2Stress^7: [^6"..(needTypes.stress or 0).."^7]")
+            setStress(src, needTypes.stress)
+        end
         isConsuming[src] = nil
     else
         return
