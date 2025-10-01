@@ -294,31 +294,17 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 
 	if not cancelled then
         hideText()
-            local needTypes = { }
+        local needTypes = { }
 
         if needStats then
 
             --jsonPrint(needStats)
             if needStats.hunger > 0 then
-                if Core and Core.Functions then
-                    needTypes.hunger = (Core.Functions.GetPlayerData().metadata["hunger"] or 0) + needStats.hunger
-                    needTypes.hunger = needTypes.hunger > 100 and 100 or needTypes.hunger
-
-                elseif ESX and ESX.GetPlayerData then
-                    needTypes.hunger = (needStats.hunger / 100) * 1000000
-                    needTypes.hunger = needTypes.hunger > 1000000 and 1000000 or needTypes.hunger
-                end
+                needTypes.hunger = needTypes.hunger > 100 and 100 or needTypes.hunger
             end
 
             if needStats.thirst > 0 then
-                if Core and Core.Functions then
-                    needTypes.thirst = (Core.Functions.GetPlayerData().metadata["thirst"] or 0) + needStats.thirst
-                    needTypes.thirst = needTypes.thirst > 100 and 100 or needTypes.thirst
-
-                elseif ESX and ESX.GetPlayerData then
-                    needTypes.thirst = (needStats.thirst / 100) * 1000000
-                    needTypes.thirst = needTypes.thirst > 1000000 and 1000000 or needTypes.thirst
-                end
+                needTypes.thirst = needTypes.thirst > 100 and 100 or needTypes.thirst
             end
         end
             TriggerServerEvent(getScript()..":server:finishConsume", needTypes)
