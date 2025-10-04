@@ -137,14 +137,15 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
     local canRun = consumable.canRun
     local stats = consumable.stats
 
-    local time, stress, heal, armor, needStats = GenerateRandomValues({
+    local time, heal, armor, needStats = GenerateRandomValues({
         time = consumable.time or { 5000, 6000 },
-        stress = consumable.stress or 0,
         heal = consumable.heal or 0,
         armor = consumable.armor or 0,
         hunger = consumable.stats and consumable.stats.hunger or 0,
         thirst = consumable.stats and consumable.stats.thirst or 0,
+        stress = consumable.stress or 0,
     })
+
     if emote.AnimationOptions.Prop then
 		model = emote.AnimationOptions.Prop
 		bone = GetPedBoneIndex(Player, emote.AnimationOptions.PropBone)
@@ -263,7 +264,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                 "Type: "..(type or ""),
                 "Hunger: "..(needStats.hunger or 0).."%",
                 "Thirst: "..(needStats.thirst or 0).."%",
-                "Stress: "..(stress or 0).."%",
+                "Stress: "..(needStats.stress or 0).."%",
                 "Heal: "..(heal or 0).."%",
                 "Armour: "..(armor or 0).."%",
             }, nil, nil)
@@ -294,25 +295,22 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 
 	if not cancelled then
         hideText()
-        local needTypes = { }
 
         if needStats then
-
-            --jsonPrint(needStats)
             if needStats.hunger > 0 then
-                needTypes.hunger = needTypes.hunger > 100 and 100 or needTypes.hunger
+                needStats.hunger = needStats.hunger > 100 and 100 or needStats.hunger
             end
 
             if needStats.thirst > 0 then
-                needTypes.thirst = needTypes.thirst > 100 and 100 or needTypes.thirst
+                needStats.thirst = needStats.thirst > 100 and 100 or needStats.thirst
+            end
+
+            if needStats.stress > 0 then
+                needStats.stress = needStats.stress > 100 and 100 or needStats.stress
             end
         end
-            TriggerServerEvent(getScript()..":server:finishConsume", needTypes)
+        TriggerServerEvent(getScript()..":server:finishConsume", needStats)
 
-        if stress and stress ~= 0 then
-            debugPrint("^5Debug^7: ^3Consume^7: ^2Relieving ^6"..stress.." ^2stress^7.")
-            needTypes.stress = stress
-        end
 		if heal and heal ~= 0 then
             debugPrint("^5Debug^7: ^3Consume^7: ^2Healing player by^7: ^6"..heal)
             SetEntityHealth(Player, GetEntityHealth(Player) + heal)

@@ -16,8 +16,7 @@ function GenerateRandomValues(data)
         end
     end
     return transData["time"],
-           transData["stress"],
            transData["heal"],
            transData["armor"],
-           { hunger = transData["hunger"], thirst = transData["thirst"] }
+           { hunger = transData["hunger"], thirst = transData["thirst"], stress = transData["stress"] }
 end
