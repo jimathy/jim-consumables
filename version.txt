@@ -1,6 +1,7 @@
-2.0.07
+2.0.08
 
-- Add support for multi-framework stress events (fixes ESX stress)
-- Fix double calculation of hunger and thirst
+- Fix issues with stress calculations
+- Separates "drug control" from canOD boolean
+- Adds support for jim_bridge built-in synchronized alcohol/drug effects
 
 https://github.com/jimathy/jim-consumables/releases/latest
