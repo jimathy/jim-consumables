@@ -120,10 +120,8 @@ RegisterNetEvent(getScript()..":server:finishConsume", function(needTypes)
         removeItem(isConsuming[src].item, 1, src)
         if isConsuming[src].rewardItem then
             debugPrint("^5Debug^7: ^2Giving player ^3"..src.." ^2reward items^7")
-            for i = 1, #isConsuming[src].rewardItem do
-                local item = isConsuming[src].rewardItem[i]
-                addItem(item.item, item.amount, nil, src)
-            end
+            local item = isConsuming[src].rewardItem
+            addItem(item.item, item.amount, nil, src)
         end
         if isConsuming[src].returnItem then
             debugPrint("^5Debug^7: ^2Giving player ^3"..src.." ^2return item^7")
@@ -133,11 +131,9 @@ RegisterNetEvent(getScript()..":server:finishConsume", function(needTypes)
             end
         end
         if isConsuming[src].packItem then
-            for i = 1, #isConsuming[src].packItem do
             debugPrint("^5Debug^7: ^2Giving player ^3"..src.." ^2Pack items^7")
-                local item = isConsuming[src].packItem[i]
-                addItem(item.item, item.amount, nil, src)
-            end
+            local item = isConsuming[src].packItem
+            addItem(item.item, item.amount, nil, src)
         end
 
         -- Needs
