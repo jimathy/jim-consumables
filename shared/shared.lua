@@ -15,8 +15,23 @@ function GenerateRandomValues(data)
             transData[k] = v
         end
     end
-    return transData["time"],
-           transData["heal"],
-           transData["armor"],
-           { hunger = transData["hunger"], thirst = transData["thirst"], stress = transData["stress"] }
+    if transData.hunger > 0 then
+        transData.hunger = transData.hunger > 100 and 100 or transData.hunger
+    end
+
+    if transData.thirst > 0 then
+        transData.thirst = transData.thirst > 100 and 100 or transData.thirst
+    end
+
+    if transData.stress > 0 then
+        transData.stress = transData.stress > 100 and 100 or transData.stress
+    end
+    return  transData["time"],
+            transData["heal"],
+            transData["armor"],
+            {
+                hunger = transData["hunger"],
+                thirst = transData["thirst"],
+                stress = transData["stress"]
+            }
 end

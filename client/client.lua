@@ -63,7 +63,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 
     if requiredItem then
         if not hasItem(requiredItem, 1) then
-            triggerNotify(nil, "You need a "..Items[requiredItem].label, "error")
+            triggerNotify(nil, "You need a "..getItemLabel(requiredItem), "error")
             return
         else
         --    if requiredItem == "lighter" then breakTool({ item = "lighter", damage = math.random(0, 1) }) end
@@ -210,7 +210,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
         CreateThread(function()
             if progressBar({
                 time = time,
-                label = string..Items[itemName].label.."..",
+                label = string..getItemLabel(itemName).."..",
                 dead = false,
                 disableMovement = false,
                 disableCombat = true,
@@ -222,7 +222,7 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             end
         end)
     else
-        triggerNotify(nil, string..Items[itemName].label.."..", "success")
+        triggerNotify(nil, string..getItemLabel(itemName).."..", "success")
     end
 
 	consuming = true
@@ -296,19 +296,6 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
 	if not cancelled then
         hideText()
 
-        if needStats then
-            if needStats.hunger > 0 then
-                needStats.hunger = needStats.hunger > 100 and 100 or needStats.hunger
-            end
-
-            if needStats.thirst > 0 then
-                needStats.thirst = needStats.thirst > 100 and 100 or needStats.thirst
-            end
-
-            if needStats.stress > 0 then
-                needStats.stress = needStats.stress > 100 and 100 or needStats.stress
-            end
-        end
         TriggerServerEvent(getScript()..":server:finishConsume", needStats)
 
 		if heal and heal ~= 0 then
@@ -320,15 +307,41 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
             TriggerServerEvent('hospital:server:SetArmor', (GetPedArmour(Player) + armor)) SetPedArmour(Player, (GetPedArmour(Player) + armor))
         end
 		if type == "alcohol" then
-			alcoholCount += 1
-            debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4alcoholCount^7: ^6"..alcoholCount)
-			if alcoholCount > 1 and alcoholCount < 4 then
-				TriggerEvent("evidence:client:SetStatus", "alcohol", 200)
-			elseif alcoholCount >= 4 then
-				TriggerEvent("evidence:client:SetStatus", "heavyalcohol", 200)
-                CreateThread(function()
-                    AlienEffect()
-                end) -- Used as overdosing/too drunk effect
+            if checkExportExists("jim_bridge", "addAlcoholCount") then
+                exports.jim_bridge:addAlcoholCount(1, stats.canOD)
+            else
+                alcoholCount = alcoholCount + 1
+                debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4alcoholCount^7: ^6"..alcoholCount)
+                if alcoholCount > 1 and alcoholCount <= 4 then
+                    TriggerEvent("evidence:client:SetStatus", "alcohol", 200)
+                elseif alcoholCount >= 4 then
+                    TriggerEvent("evidence:client:SetStatus", "heavyalcohol", 200)
+                    CreateThread(function()
+                        AlienEffect()
+                    end)
+                end
+
+                if stats.canOD and alcoholCount >= 5 then
+                    SetEntityHealth(Player, GetEntityHealth(Player) - math.random(5, 10))
+                end
+            end
+        end
+		if type == "drug" then
+            if checkExportExists("jim_bridge", "addDrugCount") then
+                exports.jim_bridge:addDrugCount(1, stats.canOD or false)
+            else
+                drugCount = drugCount + 1
+                debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount)
+                if drugCount > 3 and drugCount < 7 then
+
+                elseif drugCount >= 7 then
+                    CreateThread(function()
+                        AlienEffect()
+                    end)
+                end
+                if stats.canOD and drugCount >= 4 then
+                    SetEntityHealth(Player, GetEntityHealth(Player) - math.random(5, 10))
+                end
             end
         end
         if stats then
@@ -350,14 +363,8 @@ RegisterNetEvent(getScript()..':Consume', function(itemName)
                 end
             end
 			if stats.canOD then
-				drugCount += 1
-                debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount)
-				if drugCount >= 4 then
-                    debugPrint("^5Debug^7: ^3Consume^7: ^2Current ^4drugCount^7: ^6"..drugCount.."^7 - ^2 removing health")
-					SetEntityHealth(PlayerPedId(), GetEntityHealth(Player) - math.random(10, 15))
-					if drugCount >= 7 then
-                        CreateThread(function() AlienEffect() end) -- If too many drugs, if not dead will make you stumble
-					end
+				if drugCount >= 4 or alcoholCount >= 5 then
+					SetEntityHealth(Player, GetEntityHealth(Player) - math.random(5, 10))
 				end
 			end
             if stats.effect then
