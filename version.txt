@@ -1,7 +1,6 @@
-2.0.08
+2.0.09
 
-- Fix issues with stress calculations
-- Separates "drug control" from canOD boolean
-- Adds support for jim_bridge built-in synchronized alcohol/drug effects
+- Fix possible issue with nil needTypes tables being sent
+- Fix packitems and return items not giving any items
 
 https://github.com/jimathy/jim-consumables/releases/latest
